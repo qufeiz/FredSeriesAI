@@ -21,6 +21,8 @@ dependencies = [
     "langchain-mongodb>=0.2.0",
     "langchain-cohere>=0.3.0",
     "pydantic>=2.11.7",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
 ]
 
 [project.optional-dependencies]
