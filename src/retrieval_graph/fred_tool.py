@@ -1,48 +1,88 @@
 import base64
 import io
 import os
-import json
-from typing import List
+from dataclasses import dataclass
+from functools import lru_cache
+from typing import Any, Iterable, Sequence
 
 from dotenv import load_dotenv
 from fredapi import Fred
-from langchain.schema import Document
 from matplotlib.figure import Figure
 
 load_dotenv()
 
-class FredTool:
-    def __init__(self):
-        self.fred = Fred(api_key=os.getenv("FRED_API_KEY"))
 
-    def get_series_data(self, series_id: str) -> dict:
-        """Fetch FRED series data, including a preview chart."""
-        data = self.fred.get_series(series_id, limit=10)  # Only last 10 points for MVP
-        info = self.fred.get_series_info(series_id)
+@dataclass(frozen=True)
+class SeriesSnapshot:
+    """Lightweight container for FRED series metadata and observations."""
 
-        observations = [
-            {"date": str(date), "value": float(value)}
-            for date, value in zip(data.index, data.values)
-            if value == value  # filter NaNs
-        ]
+    series_id: str
+    title: str
+    units: str
+    frequency: str
+    observations: list[dict[str, Any]]
 
-        chart_image = self._create_chart_image(observations, info["title"])
+    def latest(self, count: int = 5) -> list[dict[str, Any]]:
+        """Return the most recent `count` datapoints (chronological order)."""
+        return self.observations[-count:]
 
-        return {
-            "series_id": series_id,
-            "title": info["title"],
-            "units": info["units"],
-            "frequency": info["frequency"],
-            "recent_data": observations[-5:] if observations else [],  # Last 5 points
-            "chart_image": chart_image,
-        }
 
-    def _create_chart_image(self, observations: List[dict], title: str | None) -> str | None:
-        """Render data points to a base64-encoded PNG for front-end display."""
+class FredClient:
+    """Thin wrapper around `fredapi.Fred` with helper formatting."""
+
+    def __init__(self) -> None:
+        api_key = os.getenv("FRED_API_KEY")
+        if not api_key:
+            raise RuntimeError(
+                "FRED_API_KEY is required to call FRED tools but is not set."
+            )
+        self._fred = Fred(api_key=api_key)
+
+    def get_series_snapshot(
+        self, series_id: str, *, limit: int = 180
+    ) -> SeriesSnapshot:
+        """Fetch recent datapoints and metadata for a series."""
+        data = self._fred.get_series(
+            series_id,
+            limit=limit,
+            sort_order="desc",
+        )
+        info = self._fred.get_series_info(series_id)
+
+        observations: list[dict[str, Any]] = []
+        for date, value in zip(data.index, data.values):
+            if value != value:  # filter NaNs
+                continue
+            if hasattr(date, "strftime"):
+                date_str = date.strftime("%Y-%m-%d")
+            else:
+                date_str = str(date)
+            observations.append({"date": date_str, "value": float(value)})
+
+        # Returned in reverse chronological order; flip for charting
+        observations.reverse()
+
+        return SeriesSnapshot(
+            series_id=series_id,
+            title=info.get("title", series_id),
+            units=info.get("units", ""),
+            frequency=info.get("frequency", ""),
+            observations=observations,
+        )
+
+    def render_chart(
+        self,
+        observations: Sequence[dict[str, Any]],
+        title: str | None,
+        *,
+        width: int = 6,
+        height: int = 3,
+    ) -> str | None:
+        """Render datapoints to a base64 PNG suitable for front-end display."""
         if not observations:
             return None
 
-        figure = Figure(figsize=(6, 3))
+        figure = Figure(figsize=(width, height))
         axis = figure.subplots()
 
         dates = [item["date"] for item in observations]
@@ -63,31 +103,64 @@ class FredTool:
         encoded = base64.b64encode(buffer.read()).decode("utf-8")
         return f"data:image/png;base64,{encoded}"
 
-def enrich_with_fred_data(retrieved_docs: List[Document]) -> List[Document]:
-    """Check docs for series IDs and enrich with live FRED data"""
-    fred_tool = FredTool()
-    enriched_docs = []
 
-    for doc in retrieved_docs:
-        series_id = doc.metadata.get("series_id")
+@lru_cache(maxsize=1)
+def get_fred_client() -> FredClient:
+    """Return a cached FRED client."""
+    return FredClient()
 
-        if series_id:
-            # Fetch live data
-            fred_data = fred_tool.get_series_data(series_id)
-            # Create enriched document
-            content_payload = {k: v for k, v in fred_data.items() if k != "chart_image"}
-            enriched_content = f"{doc.page_content}\n\nLive FRED Data:\n{json.dumps(content_payload, indent=2)}"
-            metadata = {**doc.metadata, "enriched_with_fred": True}
-            if fred_data.get("chart_image"):
-                metadata["fred_chart_image"] = fred_data["chart_image"]
 
-            enriched_doc = Document(
-                page_content=enriched_content,
-                metadata=metadata,
-            )
-            enriched_docs.append(enriched_doc)
-        else:
-            # No series ID, keep original
-            enriched_docs.append(doc)
+def build_chart_attachment(
+    snapshot: SeriesSnapshot, *, max_points: int = 90
+) -> dict[str, Any]:
+    """Generate a chart attachment payload for the latest datapoints."""
+    client = get_fred_client()
+    points = snapshot.observations[-max_points:]
+    chart_image = client.render_chart(points, snapshot.title)
+    if not chart_image:
+        raise ValueError(f"No datapoints available to chart {snapshot.series_id}")
 
-    return enriched_docs
+    return {
+        "type": "image",
+        "source": chart_image,
+        "title": snapshot.title,
+        "series_id": snapshot.series_id,
+        "units": snapshot.units,
+    }
+
+
+def build_series_datablock(
+    snapshot: SeriesSnapshot, *, latest_points: int = 12
+) -> dict[str, Any]:
+    """Return structured datapoints for downstream reasoning."""
+    observations = snapshot.latest(latest_points)
+    return {
+        "series_id": snapshot.series_id,
+        "title": snapshot.title,
+        "units": snapshot.units,
+        "frequency": snapshot.frequency,
+        "points": observations,
+    }
+
+
+def fetch_chart(series_id: str) -> dict[str, Any]:
+    """Fetch a series and prepare an attachment-only response."""
+    snapshot = get_fred_client().get_series_snapshot(series_id)
+    attachment = build_chart_attachment(snapshot)
+    return {
+        "message": f"Generated chart for {snapshot.title} ({series_id}).",
+        "attachments": [attachment],
+    }
+
+
+def fetch_recent_data(series_id: str, *, latest_points: int = 12) -> dict[str, Any]:
+    """Fetch structured datapoints for a series."""
+    snapshot = get_fred_client().get_series_snapshot(series_id)
+    datablock = build_series_datablock(snapshot, latest_points=latest_points)
+    return {
+        "message": (
+            f"Retrieved {len(datablock['points'])} recent data points for "
+            f"{snapshot.title} ({series_id})."
+        ),
+        "series_data": [datablock],
+    }

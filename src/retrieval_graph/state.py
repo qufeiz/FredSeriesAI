@@ -147,6 +147,35 @@ def add_queries(existing: Sequence[str], new: Sequence[str]) -> Sequence[str]:
     return list(existing) + list(new)
 
 
+def _coerce_sequence(value: Union[None, Sequence[Any], Any]) -> list[Any]:
+    """Ensure new reducer inputs are coerced to a list."""
+    if value is None:
+        return []
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        return list(value)
+    return [value]
+
+
+def add_attachments(
+    existing: Optional[Sequence[dict[str, Any]]],
+    new: Union[Sequence[dict[str, Any]], dict[str, Any], None],
+) -> list[dict[str, Any]]:
+    """Append attachments to state, preserving existing ones."""
+    base = list(existing) if existing else []
+    base.extend(_coerce_sequence(new))
+    return base
+
+
+def add_series_data(
+    existing: Optional[Sequence[dict[str, Any]]],
+    new: Union[Sequence[dict[str, Any]], dict[str, Any], None],
+) -> list[dict[str, Any]]:
+    """Append structured series datapoints captured by FRED data tool."""
+    base = list(existing) if existing else []
+    base.extend(_coerce_sequence(new))
+    return base
+
+
 @dataclass(kw_only=True)
 class State(InputState):
     """The state of your graph / agent."""
@@ -156,6 +185,16 @@ class State(InputState):
 
     retrieved_docs: list[Document] = field(default_factory=list)
     """Populated by the retriever. This is a list of documents that the agent can reference."""
+
+    attachments: Annotated[list[dict[str, Any]], add_attachments] = field(
+        default_factory=list
+    )
+    """Out-of-band payloads (e.g., chart images) returned to clients without entering the LLM prompt."""
+
+    series_data: Annotated[list[dict[str, Any]], add_series_data] = field(
+        default_factory=list
+    )
+    """Structured datapoints from FRED data tool, available for downstream reasoning."""
 
     # Feel free to add additional attributes to your state as needed.
     # Common examples include retrieved documents, extracted entities, API connections, etc.

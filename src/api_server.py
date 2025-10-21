@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.messages import HumanMessage, AIMessage
@@ -89,29 +89,27 @@ async def ask(query: Query, current_user: dict = Depends(get_current_user)):
 
         result = await graph.ainvoke(
             {"messages": messages},
-            {"configurable": {"user_id": user_id}}
+            {"configurable": {"user_id": user_id}},
         )
 
         attachments: List[Dict[str, str]] = []
-        for doc in result.get("retrieved_docs", []) or []:
-            chart_image = doc.metadata.get("fred_chart_image")
-            if chart_image:
-                attachments.append(
-                    {
-                        "type": "image",
-                        "source": chart_image,
-                        "title": doc.metadata.get("title", "FRED Series"),
-                        "series_id": doc.metadata.get("series_id", ""),
-                    }
-                )
-                break
+        for attachment in result.get("attachments", []) or []:
+            if isinstance(attachment, dict):
+                attachments.append(attachment)
+
+        series_data: List[Dict[str, str]] = []
+        for block in result.get("series_data", []) or []:
+            if isinstance(block, dict):
+                series_data.append(block)
 
         for message in reversed(result["messages"]):
-            if hasattr(message, 'content') and message.content:
+            if hasattr(message, "content") and message.content:
                 logger.info(f"Response sent to user {user_id}")
                 payload: Dict[str, object] = {"response": message.content}
                 if attachments:
                     payload["attachments"] = attachments
+                if series_data:
+                    payload["series_data"] = series_data
                 return payload
 
         logger.warning(f"No response generated for user {user_id}")
