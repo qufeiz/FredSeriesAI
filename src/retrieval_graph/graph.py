@@ -20,6 +20,7 @@ from retrieval_graph.fred_tool import (
     fetch_recent_data,
     fetch_series_release_schedule,
     fetch_release_structure_by_name,
+    search_series,
 )
 from retrieval_graph.state import InputState, State
 from retrieval_graph.utils import format_docs, load_chat_model
@@ -128,6 +129,23 @@ TOOL_DEFINITIONS = [
                     }
                 },
                 "required": ["release_name"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "fred_search_series",
+            "description": "Search the FRED catalog for series matching a text query.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search text to find FRED series.",
+                    }
+                },
+                "required": ["query"],
             },
         },
     },
@@ -269,6 +287,17 @@ async def call_tool(
                 message = payload.get(
                     "message",
                     f"Retrieved release structure for {release_name}.",
+                )
+                content = f"{message}\n{json.dumps(payload, indent=2)}"
+        elif name == "fred_search_series":
+            query = args.get("query")
+            if not query:
+                content = "A search query is required to search FRED series."
+            else:
+                payload = search_series(query)
+                message = payload.get(
+                    "message",
+                    f"Retrieved search results for '{query}'.",
                 )
                 content = f"{message}\n{json.dumps(payload, indent=2)}"
         else:

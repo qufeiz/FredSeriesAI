@@ -387,3 +387,35 @@ def fetch_release_structure_by_name(release_name: str) -> dict[str, Any]:
             "tables": None,
             "error": str(exc),
         }
+
+
+def search_series(query: str, *, limit: int = 5) -> dict[str, Any]:
+    """Search for series matching a query using FRED's search API."""
+    api_key = os.getenv("FRED_API_KEY")
+    if not api_key:
+        raise RuntimeError("FRED_API_KEY is required to search FRED series.")
+
+    try:
+        response = requests.get(
+            "https://api.stlouisfed.org/fred/series/search",
+            params={
+                "api_key": api_key,
+                "file_type": "json",
+                "search_text": query,
+                "limit": limit,
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        series = payload.get("seriess", [])
+        return {
+            "message": f"Found {len(series)} series for query '{query}'.",
+            "results": series,
+        }
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "message": f"Failed to search series for '{query}': {exc}",
+            "results": [],
+            "error": str(exc),
+        }

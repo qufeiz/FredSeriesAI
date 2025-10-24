@@ -33,9 +33,9 @@ if SRC_PATH not in sys.path:
 from retrieval_graph.fred_tool import (
     fetch_chart,
     fetch_recent_data,
-    #fetch_release_schedule,
     fetch_series_release_schedule,
     fetch_release_structure_by_name,
+    search_series,
 )  # noqa: E402
 from retrieval_graph.graph import graph  # noqa: E402
 
@@ -115,6 +115,12 @@ async def main() -> None:
         default="H.4.1",
         help="Optional FRED release name (e.g. 'H.4.1') to fetch structure metadata.",
     )
+    parser.add_argument(
+        "--search-query",
+        type=str,
+        default="denmark inflation",
+        help="Optional query to test the series search helper (default: inflation).",
+    )
     args = parser.parse_args()
 
     require_env("FRED_API_KEY")
@@ -158,6 +164,10 @@ async def main() -> None:
     if args.release_name:
         structure_payload = fetch_release_structure_by_name(args.release_name)
         dump_section("Release Structure", structure_payload)
+
+    if args.search_query:
+        search_payload = search_series(args.search_query)
+        dump_section("Series Search", search_payload)
 
     if args.prompt:
         await run_agent(args.series_id, args.prompt, args.user_id)
