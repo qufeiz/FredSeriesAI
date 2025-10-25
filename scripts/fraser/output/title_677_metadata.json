@@ -1,0 +1,203 @@
+{
+  "format": "json",
+  "page": 1,
+  "limit": 100,
+  "fields": [
+    "*"
+  ],
+  "total": 1,
+  "records": [
+    {
+      "name": [
+        {
+          "role": "contributor",
+          "namePart": [
+            "United States. Federal Open Market Committee"
+          ],
+          "recordInfo": {
+            "recordIdentifier": [
+              "10"
+            ]
+          }
+        }
+      ],
+      "note": [
+        {
+          "$": "<p>The FOMC was preceded by the Open Market Policy Conference (1930-1933) and <a target=\"_blank\" rel=\"nofollow\" href=\"https://fraser.stlouisfed.org/title/5187\">Open Market Investment Committee</a> (1923-1930).</p>",
+          "@type": "public"
+        },
+        {
+          "$": "<p>A summary of the various reports from the Federal Open Market Committee since 1935 is available at the <a target=\"_blank\" rel=\"nofollow\" href=\"http://www.federalreserve.gov/monetarypolicy/fomc_historical.htm\">FOMC website</a>.</p>",
+          "@type": "public"
+        },
+        {
+          "$": "<p>For more information on the FOMC Meeting Minutes, when and how minutes are published and what information is available, please see \"<a target=\"_blank\" rel=\"nofollow\" href=\"https://fraser.stlouisfed.org/title/62/item/20983/toc/399590\">Background on the FOMC Meeting Minutes</a>\" from the Spring 2005 Federal Reserve Bulletin.</p>",
+          "@type": "public"
+        },
+        {
+          "$": "<p>For more information on how to read a FOMC statement, see this Feducation Video from the St. Louis Fed. <a target=\"_blank\" rel=\"nofollow\" href=\"https://www.stlouisfed.org/education/feducation-video-series/episode-4-understanding-an-fomc-statement\">https://www.stlouisfed.org/education/feducation-video-series/episode-4-understanding-an-fomc-statement</a></p>",
+          "@type": "public"
+        },
+        {
+          "$": "<p><a target=\"_blank\" rel=\"nofollow\" href=\"http://www.philadelphiafed.org/research-and-data/real-time-center/greenbook-data/\">\ufeffGreenbook data sets</a> are available from the Federal Reserve Bank of Philadelphia.</p>",
+          "@type": "public"
+        },
+        {
+          "$": "<p>Preceding each FOMC meeting, the FOMC Secretariat distributes to the Committee memos covering a range of subjects. A selection of these memos has been released by the FOMC in response to FOIA requests. Unless a memo explicitly states that it is related to a particular meeting, memos are associated to the next regularly scheduled meeting.</p>",
+          "@type": "public"
+        }
+      ],
+      "subject": {
+        "theme": [
+          {
+            "theme": "Federal Open Market Committee",
+            "recordInfo": {
+              "recordIdentifier": [
+                "18"
+              ]
+            }
+          },
+          {
+            "theme": "Meltzer's History of the Federal Reserve - Primary Sources",
+            "recordInfo": {
+              "recordIdentifier": [
+                "97"
+              ]
+            }
+          }
+        ],
+        "topic": [
+          {
+            "topic": "Open market operations",
+            "recordInfo": {
+              "recordIdentifier": [
+                "4258"
+              ]
+            }
+          }
+        ]
+      },
+      "language": [
+        "eng"
+      ],
+      "titleInfo": [
+        {
+          "title": "Federal Open Market Committee Meeting Minutes, Transcripts, and Other Documents"
+        },
+        {
+          "@type": "alternate",
+          "title": "FOMC Meeting Minutes"
+        }
+      ],
+      "originInfo": {
+        "issuance": "periodical",
+        "frequency": "annual",
+        "dateIssued": [
+          {
+            "$": "1933-07-20",
+            "@point": "start"
+          },
+          {
+            "$": "2025-09-17",
+            "@point": "end"
+          }
+        ]
+      },
+      "recordInfo": {
+        "recordIdentifier": [
+          677
+        ],
+        "recordUpdatedDate": "2025-05-15 16:00:47",
+        "recordCreationDate": "2012-05-16 13:04:13.345328",
+        "recordType": "title"
+      },
+      "relatedItem": [
+        {
+          "@type": "similarTo",
+          "titleInfo": [
+            {
+              "title": "Records of the Federal Reserve System",
+              "titlePartNumber": "Record Group 82"
+            }
+          ],
+          "recordInfo": {
+            "recordIdentifier": [
+              "1344"
+            ]
+          }
+        },
+        {
+          "@type": "similarTo",
+          "titleInfo": [
+            {
+              "title": "Minutes of the Board of Governors of the Federal Reserve System"
+            }
+          ],
+          "recordInfo": {
+            "recordIdentifier": [
+              "821"
+            ]
+          }
+        },
+        {
+          "@type": "similarTo",
+          "titleInfo": [
+            {
+              "title": "Minutes and Recommendations of the Federal Advisory Council"
+            }
+          ],
+          "recordInfo": {
+            "recordIdentifier": [
+              "1152"
+            ]
+          }
+        },
+        {
+          "@type": "similarTo",
+          "titleInfo": [
+            {
+              "title": "Minutes of the Meetings of the Open Market Policy Conference"
+            }
+          ],
+          "recordInfo": {
+            "recordIdentifier": [
+              "5188"
+            ]
+          }
+        },
+        {
+          "@type": "similarTo",
+          "titleInfo": [
+            {
+              "title": "Minutes of the Meetings of the Open Market Investment Committee"
+            }
+          ],
+          "recordInfo": {
+            "recordIdentifier": [
+              "5187"
+            ]
+          }
+        }
+      ],
+      "typeOfResource": "text",
+      "accessCondition": "http://rightsstatements.org/vocab/CNE/1.0/",
+      "physicalDescription": {
+        "form": "print",
+        "digitalOrigin": "reformatted digital"
+      },
+      "location": {
+        "url": [
+          "https://fraser.stlouisfed.org/title/federal-open-market-committee-meeting-minutes-transcripts-documents-677",
+          {
+            "@access": "preview",
+            "$": "https://fraser.stlouisfed.org/files/files/docs/siteimages/thumbnails/FOMC.jpg"
+          }
+        ],
+        "apiUrl": [
+          "https://fraser.stlouisfed.org/api/title/677"
+        ]
+      }
+    }
+  ],
+  "start": 0
+}

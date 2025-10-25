@@ -1,0 +1,85 @@
+{
+  "format": "json",
+  "page": 1,
+  "limit": 100,
+  "fields": [
+    "titleInfo",
+    "originInfo",
+    "location",
+    "recordInfo"
+  ],
+  "total": 1,
+  "records": [
+    {
+      "titleInfo": [
+        {
+          "title": "Meeting, January 26-27, 2010"
+        }
+      ],
+      "originInfo": {
+        "issuance": "periodical",
+        "sortDate": "2010-01-26",
+        "dateIssued": "January 26-27, 2010"
+      },
+      "recordInfo": {
+        "recordIdentifier": [
+          23289
+        ],
+        "recordUpdatedDate": "2025-07-15 22:32:20",
+        "recordCreationDate": "2012-05-16 13:04:13.345328",
+        "recordContentSource": "frs",
+        "recordType": "item"
+      },
+      "location": {
+        "url": [
+          "https://fraser.stlouisfed.org/title/federal-open-market-committee-meeting-minutes-transcripts-documents-677/meeting-january-26-27-2010-23289"
+        ],
+        "iiif_manifest_url": [
+          "https://iiif.slf.digirati.io/presentation/item/23289"
+        ],
+        "apiUrl": [
+          "https://fraser.stlouisfed.org/api/item/23289"
+        ],
+        "pdfUrl": [
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/20100127statement.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/fomcminutes20100127.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/fomcminutes20100127epa.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/fullreport20100127.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/FOMC20100127meeting.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/FOMC20100127material.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/FOMC20100127_accessible.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/FOMC20100127gbpt120100120.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/FOMC20100127gbpt220100120.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/FOMC20100127gbsup20100122.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/FOMC20100127bluebook20100121.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/FOMC20100127Agenda.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/FOMC20100127bbgbmaterial.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/FOMC20100127SEPcompilation.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/FOMC20100127SEPmaterial.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/memos/fomc20100121memo01.pdf",
+          "https://fraser.stlouisfed.org/docs/historical/FOMC/meetingdocuments/memos/FOMC20100115memo01.pdf"
+        ],
+        "textUrl": [
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/20100127statement.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/fomcminutes20100127.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/fomcminutes20100127epa.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/fullreport20100127.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/FOMC20100127meeting.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/FOMC20100127material.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/FOMC20100127_accessible.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/FOMC20100127gbpt120100120.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/FOMC20100127gbpt220100120.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/FOMC20100127gbsup20100122.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/FOMC20100127bluebook20100121.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/FOMC20100127Agenda.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/FOMC20100127bbgbmaterial.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/FOMC20100127SEPcompilation.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/FOMC20100127SEPmaterial.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/memos/fomc20100121memo01.txt",
+          "https://fraser.stlouisfed.org/files/text/historical/FOMC/meetingdocuments/memos/FOMC20100115memo01.txt"
+        ]
+      }
+    }
+  ],
+  "start": 0
+}

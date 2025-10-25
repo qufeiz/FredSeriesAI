@@ -37,6 +37,7 @@ from retrieval_graph.fred_tool import (
     fetch_release_structure_by_name,
     search_series,
 )  # noqa: E402
+from retrieval_graph.fraser_tool import search_fomc_titles  # noqa: E402
 from retrieval_graph.graph import graph  # noqa: E402
 
 
@@ -121,9 +122,16 @@ async def main() -> None:
         default="denmark inflation",
         help="Optional query to test the series search helper (default: inflation).",
     )
+    parser.add_argument(
+        "--fomc-query",
+        type=str,
+        default="jan 2010 fomc statement",
+        help="Optional fuzzy query to test the FRASER/Postgres FOMC title search.",
+    )
     args = parser.parse_args()
 
     require_env("FRED_API_KEY")
+    require_env("FRASER_API_KEY")
 
     #chart_payload = fetch_chart(args.series_id)
     #dump_section("Chart Payload", chart_payload)
@@ -168,6 +176,10 @@ async def main() -> None:
     if args.search_query:
         search_payload = search_series(args.search_query)
         dump_section("Series Search", search_payload)
+
+    if args.fomc_query:
+        fomc_payload = search_fomc_titles(args.fomc_query)
+        dump_section("FRASER FOMC Title Search", fomc_payload)
 
     if args.prompt:
         await run_agent(args.series_id, args.prompt, args.user_id)
