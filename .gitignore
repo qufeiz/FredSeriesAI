@@ -165,3 +165,7 @@ uv.lock
 # Generated/demo data artifacts
 scripts/**/*.csv
 scripts/**/*.json
+.langgraph_api/
+*.csv
+*.json
+
