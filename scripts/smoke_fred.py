@@ -153,12 +153,6 @@ async def main() -> None:
         default="1979-12-31",
         help="End date for correlation window (default: 1979-12-31).",
     )
-    parser.add_argument(
-        "--corr-max-lag",
-        type=int,
-        default=48,
-        help="Max lag (months) to test in correlation helper (default: 48).",
-    )
     args = parser.parse_args()
 
     require_env("FRED_API_KEY")
@@ -200,7 +194,6 @@ async def main() -> None:
     correlation_payload = analyze_series_correlation(
         start_date=args.corr_start,
         end_date=args.corr_end,
-        max_lag_months=args.corr_max_lag,
         leading_series_id=args.leading_series,
         lagging_series_id=args.lagging_series,
     )

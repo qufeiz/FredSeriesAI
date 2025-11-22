@@ -26,6 +26,8 @@ Tools available:
 - fred_recent_data(series_id): fetch the latest datapoints for a FRED series. Use this when the user needs numeric values or trends, or source of a serie.
 - fred_series_release_schedule(series_id): resolve a series to its release and return upcoming publication dates.
 - fred_release_structure(release_name): fetch release metadata and table structure by release name (e.g. H.4.1).
+- fred_series_correlation(leading_series_id, lagging_series_id, start_date, end_date, max_lag_months): analyze how two series move together by comparing YoY correlations, lead/lag behavior, and long-run log-level association.
+- fomc_latest_decision(): fetch the latest FOMC decision card including target range, vote, and tool rates.
 - fred_search_series(query): search FRED for series whose metadata matches the query text.
 - fraser_search_fomc_titles(query): fuzzy search FRASER/Postgres meeting titles (e.g. "Meeting, January 26-27, 2010") to retrieve PDF URLs.
 - retrieve_documents(query): search the indexed knowledge base. Use this when the user asks for something not in FRED api.

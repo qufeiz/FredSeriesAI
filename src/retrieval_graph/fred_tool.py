@@ -86,6 +86,10 @@ class FredClient:
             data.index = pd.to_datetime(data.index)
         return data
 
+    def get_series_metadata(self, series_id: str) -> dict[str, Any]:
+        """Return metadata describing the series."""
+        return self._fred.get_series_info(series_id)
+
 
 @lru_cache(maxsize=1)
 def get_fred_client() -> FredClient:
@@ -190,6 +194,24 @@ def analyze_series_correlation(
     """Correlate YoY growth of two FRED series and inspect lead/lag behaviour."""
     try:
         client = get_fred_client()
+        leading_meta = client.get_series_metadata(leading_series_id)
+        lagging_meta = client.get_series_metadata(lagging_series_id)
+
+        def _is_monthly(meta: dict[str, Any]) -> bool:
+            frequency = (meta.get("frequency") or meta.get("frequency_short") or "").lower()
+            return "monthly" in frequency or frequency == "m"
+
+        if not _is_monthly(leading_meta) or not _is_monthly(lagging_meta):
+            return {
+                "message": (
+                    "Correlation helper currently supports monthly series only. "
+                    f"Leading series '{leading_series_id}' frequency: {leading_meta.get('frequency')!r}; "
+                    f"Lagging series '{lagging_series_id}' frequency: {lagging_meta.get('frequency')!r}."
+                ),
+                "analysis": {},
+                "error": "non_monthly_series",
+            }
+
         leading = client.get_series(leading_series_id)
         lagging = client.get_series(lagging_series_id)
 

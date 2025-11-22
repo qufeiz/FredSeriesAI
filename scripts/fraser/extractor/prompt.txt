@@ -1,0 +1,19 @@
+You are a strict parser. Extract EXACTLY the following fields from the text.
+Do not guess or infer missing values. If a value is not stated, return null.
+Return ONLY valid JSON.
+
+Fields (use null when absent):
+- meeting_id (YYYY-MM-DD)
+- meeting_date (YYYY-MM-DD)
+- target_range_low (decimal)
+- target_range_high (decimal)
+- target_change_bps (integer)
+- ioer (decimal)
+- on_rrp (decimal)
+- repo_min_rate (decimal)
+- primary_credit_rate (decimal)
+- votes_for (integer)
+- votes_against (integer)
+
+Text:
+{{TEXT_HERE}}

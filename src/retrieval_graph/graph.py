@@ -7,6 +7,8 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Iterable
 
+import boto3
+from langchain_aws import ChatBedrockConverse
 from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -20,11 +22,13 @@ from retrieval_graph.fred_tool import (
     fetch_recent_data,
     fetch_series_release_schedule,
     fetch_release_structure_by_name,
+    analyze_series_correlation,
     search_series,
 )
 from retrieval_graph.fraser_tool import search_fomc_titles
+from retrieval_graph.services import get_latest_payload
 from retrieval_graph.state import InputState, State
-from retrieval_graph.utils import format_docs, load_chat_model
+from retrieval_graph.utils import format_docs
 
 from langsmith import Client
 
@@ -171,6 +175,47 @@ TOOL_DEFINITIONS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "fred_series_correlation",
+            "description": (
+                "Analyze how two FRED series move together by comparing YoY changes and lead/lag behavior."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "leading_series_id": {
+                        "type": "string",
+                        "description": "Series assumed to lead (default: M2SL).",
+                    },
+                    "lagging_series_id": {
+                        "type": "string",
+                        "description": "Series assumed to lag (default: CPIAUCSL).",
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "description": "Start date for the analysis window (YYYY-MM-DD, default: 1970-01-01).",
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "description": "End date for the analysis window (YYYY-MM-DD, default: 1979-12-31).",
+                    },
+                },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "fomc_latest_decision",
+            "description": "Fetch the latest FOMC decision card (target range, vote, tools).",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+            },
+        },
+    },
 ]
 
 
@@ -193,7 +238,16 @@ async def call_model(
             ("placeholder", "{messages}"),
         ]
     )
-    model = load_chat_model(configuration.response_model).bind_tools(TOOL_DEFINITIONS)
+    # model = load_chat_model(configuration.response_model).bind_tools(TOOL_DEFINITIONS)
+    session = boto3.Session(profile_name="AWSAdministratorAccess-112393354239")
+    bedrock_client = session.client("bedrock-runtime", region_name="us-east-1")
+    
+    model = ChatBedrockConverse(
+        client=bedrock_client,
+        model="us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        #model="meta.llama3-1-70b-instruct-v1:0",
+        temperature=0,
+    ).bind_tools(TOOL_DEFINITIONS)
 
     retrieved_docs = format_docs(state.retrieved_docs)
     message_value = await prompt.ainvoke(
@@ -369,6 +423,35 @@ async def call_tool(
                     "query": query,
                     "results": payload.get("results", []),
                 }
+        elif name == "fred_series_correlation":
+            leading_series_id = args.get("leading_series_id", "M2SL")
+            lagging_series_id = args.get("lagging_series_id", "CPIAUCSL")
+            start_date = args.get("start_date", "1970-01-01")
+            end_date = args.get("end_date", "1979-12-31")
+            payload = analyze_series_correlation(
+                leading_series_id=leading_series_id,
+                lagging_series_id=lagging_series_id,
+                start_date=start_date,
+                end_date=end_date,
+            )
+            analysis = payload.get("analysis", {})
+            guidance = payload.get("analysis_guidance")
+
+            content_parts = [payload.get("message", "Correlation analysis completed.")]
+            if analysis:
+                content_parts.append(json.dumps(analysis, indent=2))
+            if guidance:
+                content_parts.append(guidance)
+            content = "\n\n".join(content_parts)
+            tool_call_count += 1
+            source_record = {
+                "tool": name,
+                "leading_series_id": leading_series_id,
+                "lagging_series_id": lagging_series_id,
+                "window": analysis.get("window"),
+                "results": analysis,
+                "guidance": guidance,
+            }
         elif name == "fraser_search_fomc_titles":
             query = args.get("query")
             if not query:
@@ -386,6 +469,17 @@ async def call_tool(
                     "query": query,
                     "results": payload.get("results", []),
                 }
+        elif name == "fomc_latest_decision":
+            payload = get_latest_payload()
+            message = "Fetched latest FOMC decision card."
+            content = f"{message}\n{json.dumps(payload, indent=2)}"
+            tool_call_count += 1
+            source_record = {
+                "tool": name,
+                "card": payload.get("card"),
+                "latest": payload.get("latest"),
+                "previous": payload.get("previous"),
+            }
         else:
             content = f"Tool '{name}' is not implemented."
 

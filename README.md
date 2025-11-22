@@ -1,727 +1,137 @@
-# LangGraph Retrieval Chat Bot Template
+# My LangGraph App
 
-[![CI](https://github.com/langchain-ai/retrieval-agent-template/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/langchain-ai/retrieval-agent-template/actions/workflows/unit-tests.yml)
-[![Integration Tests](https://github.com/langchain-ai/retrieval-agent-template/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/langchain-ai/retrieval-agent-template/actions/workflows/integration-tests.yml)
-[![Open in - LangGraph Studio](https://img.shields.io/badge/Open_in-LangGraph_Studio-00324d.svg?logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NS4zMzMiIGhlaWdodD0iODUuMzMzIiB2ZXJzaW9uPSIxLjAiIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHBhdGggZD0iTTEzIDcuOGMtNi4zIDMuMS03LjEgNi4zLTYuOCAyNS43LjQgMjQuNi4zIDI0LjUgMjUuOSAyNC41QzU3LjUgNTggNTggNTcuNSA1OCAzMi4zIDU4IDcuMyA1Ni43IDYgMzIgNmMtMTIuOCAwLTE2LjEuMy0xOSAxLjhtMzcuNiAxNi42YzIuOCAyLjggMy40IDQuMiAzLjQgNy42cy0uNiA0LjgtMy40IDcuNkw0Ny4yIDQzSDE2LjhsLTMuNC0zLjRjLTQuOC00LjgtNC44LTEwLjQgMC0xNS4ybDMuNC0zLjRoMzAuNHoiLz48cGF0aCBkPSJNMTguOSAyNS42Yy0xLjEgMS4zLTEgMS43LjQgMi41LjkuNiAxLjcgMS44IDEuNyAyLjcgMCAxIC43IDIuOCAxLjYgNC4xIDEuNCAxLjkgMS40IDIuNS4zIDMuMi0xIC42LS42LjkgMS40LjkgMS41IDAgMi43LS41IDIuNy0xIDAtLjYgMS4xLS44IDIuNi0uNGwyLjYuNy0xLjgtMi45Yy01LjktOS4zLTkuNC0xMi4zLTExLjUtOS44TTM5IDI2YzAgMS4xLS45IDIuNS0yIDMuMi0yLjQgMS41LTIuNiAzLjQtLjUgNC4yLjguMyAyIDEuNyAyLjUgMy4xLjYgMS41IDEuNCAyLjMgMiAyIDEuNS0uOSAxLjItMy41LS40LTMuNS0yLjEgMC0yLjgtMi44LS44LTMuMyAxLjYtLjQgMS42LS41IDAtLjYtMS4xLS4xLTEuNS0uNi0xLjItMS42LjctMS43IDMuMy0yLjEgMy41LS41LjEuNS4yIDEuNi4zIDIuMiAwIC43LjkgMS40IDEuOSAxLjYgMi4xLjQgMi4zLTIuMy4yLTMuMi0uOC0uMy0yLTEuNy0yLjUtMy4xLTEuMS0zLTMtMy4zLTMtLjUiLz48L3N2Zz4=)](https://langgraph-studio.vercel.app/templates/open?githubUrl=https://github.com/langchain-ai/retrieval-agent-template)
+> A LangGraph-based financial copilot that combines AWS Bedrock conversations with live FRED and FOMC data tools.
 
-This is a starter project to help you get started with developing a retrieval agent using [LangGraph](https://github.com/langchain-ai/langgraph) in [LangGraph Studio](https://github.com/langchain-ai/langgraph-studio).
+[Open in LangGraph Studio](https://langgraph-studio.vercel.app/templates/open?githubUrl=https://github.com/langchain-ai/retrieval-agent-template)
+· [Hosted graph](https://my-langgraph-app.fly.dev) · [Studio session on Smith](https://smith.langchain.com/studio/?baseUrl=https://my-langgraph-app.fly.dev)
 
 ![Graph view in LangGraph studio UI](./static/studio_ui.png)
 
-It contains example graphs exported from `src/retrieval_agent/graph.py` that implement a retrieval-based question answering system.
+## TL;DR
+- Conversational loop runs on LangGraph with a single `StateGraph` (see `src/retrieval_graph/graph.py`), powered by `ChatBedrockConverse` (`us.anthropic.claude-sonnet-4-5-20250929-v1:0`).
+- Built-in tools cover FRED charts, recent datapoints, release metadata, FRASER/Postgres searches, and a live "latest FOMC decision" card.
+- Document retrieval is wired to `retrieve_documents` and `retrieval.make_retriever`, but the focus of this README is the Bedrock + tooling experience—hook your own vector store when you are ready.
+- LangSmith tracing is enabled so every run is observable; attachments (chart images) and structured `series_data` ride outside the prompt for richer UX.
+- Ships with a Fly.io manifest (`fly.toml`) so you can deploy the same runtime that Studio uses.
 
-## Current Customizations
+## Repository layout
+| Path | Purpose |
+| --- | --- |
+| `src/retrieval_graph/graph.py` | Conversation loop, Bedrock client construction, tool registry, routing between `agent` and `tools` nodes. |
+| `src/retrieval_graph/state.py` | Strongly-typed LangGraph state, reducers for attachments, structured series data, and citations. |
+| `src/retrieval_graph/fred_tool.py` | Handles FRED charts, datapoints, correlation, and release metadata via the official API. |
+| `src/retrieval_graph/fraser_tool.py` | Connects to your FRASER-backed Postgres instance for FOMC title search. |
+| `src/retrieval_graph/services.py` | Builds the "latest FOMC decision" snapshot from Postgres data. |
+| `src/retrieval_graph/index_graph.py` | (Optional) single-node index flow for uploading private documents. Left intact but not needed to run the chat bot. |
+| `langgraph.json` | Declares the deployable graphs for the LangGraph CLI (`indexer` and `retrieval_graph`). |
+| `pyproject.toml` | Python dependencies; install the project in editable mode for development. |
 
-- **ReAct-style agent**: the conversational graph now orchestrates `retrieve_documents`, `fred_chart`, and `fred_recent_data` tools, storing chart images in state attachments and latest datapoints (with notes) in `series_data`.
-- **OpenSearch ingestion**: use `scripts/index_opensearch.py` to load series metadata into an OpenSearch index (`--recreate` drops and rebuilds the index, and a progress bar shows chunk preparation). Notes are excluded from the index to keep keyword search lean.
-- **FRED helpers**: `fetch_chart` now pulls the official `fredgraph.png` image (no matplotlib) while `fetch_recent_data` includes series notes; both return friendly error messages when a series ID is missing to keep conversations from crashing.
-- **Smoke testing**: `scripts/smoke_fred.py <series_id>` quickly verifies live FRED access and emits chart/data payloads without touching the agent.
+## Prerequisites
+- Python 3.9+ and a modern virtual environment tool (e.g., `uv`, `pip`, or `conda`).
+- AWS account with Bedrock access to Anthropic Claude models and a configured profile (the code references `AWSAdministratorAccess-112393354239`—change it or expose the same profile on your machine).
+- FRED API key for charts/data (`FRED_API_KEY`).
+- Network access + credentials for the FRASER/Postgres databases that hold FOMC items and meeting decisions.
+- Optional but recommended: LangSmith account for tracing (`LANGSMITH_API_KEY`).
 
-## What it does
-
-This project has two graphs: an "index" graph, and a "retrieval" graph.
-
-The index graph takes in document objects and strings, and it indexes them for the configured `user_id`.
-
-```json
-[{ "page_content": "I have 1 cat." }]
+## Quick start
+### 1. Clone & install
+```bash
+cd /path/to/projects
+git clone https://github.com/langchain-ai/retrieval-agent-template my-langgraph-app
+cd my-langgraph-app
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
 ```
+(Use `uv pip install -e .` or your preferred toolchain if you already have one.)
 
-The retrieval chat bot manages a chat history and responds based on fetched context. It:
-
-1. Takes a user **query** as input
-2. Searches for documents in filtered by user_id based on the conversation history
-3. Responds using the retrieved information and conversation context
-
-By default, it's set up to answer questions based on the user's indexed documents, which are filtered by the user's ID for personalized responses.
-
-## Getting Started
-
-Assuming you have already [installed LangGraph Studio](https://github.com/langchain-ai/langgraph-studio?tab=readme-ov-file#download), to set up:
-
-1. Create a `.env` file.
-
+### 2. Configure environment
 ```bash
 cp .env.example .env
 ```
+Fill in the values you actually use today:
 
-2. Select your retriever & index, and save the access instructions to your `.env` file.
+| Variable | Why it matters |
+| --- | --- |
+| `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` | Enables tracing + dataset logging in LangSmith; disable or leave blank if you prefer local-only runs. |
+| `AWS_PROFILE`, `AWS_REGION` | Profile/region that has Bedrock access. If you keep the hard-coded profile name in `graph.py`, make sure it exists locally. |
+| `FRED_API_KEY` | Needed for every tool implemented in `fred_tool.py` (charts, datapoints, metadata, correlation). |
+| `FRED_CHART_WIDTH`, `FRED_CHART_HEIGHT` (optional) | Override the PNG dimensions generated via `fredgraph.png`. |
+| `PG_HOST`, `PG_PORT`, `PG_NAME`, `PG_USER`, `PG_PASS` | Required by `fraser_tool.py` and `services.py` to talk to FRASER/FOMC tables. |
 
-<!--
-Setup instruction auto-generated by `langgraph template lock`. DO NOT EDIT MANUALLY.
--->
+> `FRASER_API_KEY`, OpenSearch, or ingestion-specific variables from the original template are no longer needed unless you decide to revive those scripts.
 
-### Setup Retriever
-
-The defaults values for `retriever_provider` are shown below:
-
-```yaml
-retriever_provider: elastic
-```
-
-Follow the instructions below to get set up, or pick one of the additional options.
-
-#### Elasticsearch
-
-Elasticsearch (as provided by Elastic) is an open source distributed search and analytics engine, scalable data store and vector database optimized for speed and relevance on production-scale workloads.
-
-##### Setup Elasticsearch
-Elasticsearch can be configured as the knowledge base provider for a retrieval agent by being deployed on Elastic Cloud (either as a hosted deployment or serverless project) or on your local environment.
-
-**Elasticsearch Serverless**
-
-1. Signup for a free 14 day trial with [Elasticsearch Serverless](https://cloud.elastic.co/registration?onboarding_token=search&cta=cloud-registration&tech=trial&plcmt=article%20content&pg=langchain).
-2. Get the Elasticsearch URL, found on home under "Copy your connection details".
-3. Create an API key found on home under "API Key".
-4. Copy the URL and API key to your `.env` file created above:
-
-```
-ELASTICSEARCH_URL=<ES_URL>
-ELASTICSEARCH_API_KEY=<API_KEY>
-```
-
-**Elastic Cloud**
-
-1. Signup for a free 14 day trial with [Elastic Cloud](https://cloud.elastic.co/registration?onboarding_token=search&cta=cloud-registration&tech=trial&plcmt=article%20content&pg=langchain).
-2. Get the Elasticsearch URL, found under Applications of your deployment.
-3. Create an API key. See the [official elastic documentation](https://www.elastic.co/search-labs/tutorials/install-elasticsearch/elastic-cloud#creating-an-api-key) for more information.
-4. Copy the URL and API key to your `.env` file created above:
-
-```
-ELASTICSEARCH_URL=<ES_URL>
-ELASTICSEARCH_API_KEY=<API_KEY>
-```
-**Local Elasticsearch (Docker)**
-
-```
-docker run -p 127.0.0.1:9200:9200 -d --name elasticsearch --network elastic-net   -e ELASTIC_PASSWORD=changeme   -e "discovery.type=single-node"   -e "xpack.security.http.ssl.enabled=false"   -e "xpack.license.self_generated.type=trial"   docker.elastic.co/elasticsearch/elasticsearch:8.15.1
-```
-
-See the [official Elastic documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/run-elasticsearch-locally.html) for more information on running it locally.
-
-Then populate the following in your `.env` file:
-
-```
-# As both Elasticsearch and LangGraph Studio runs in Docker, we need to use host.docker.internal to access.
-
-ELASTICSEARCH_URL=http://host.docker.internal:9200
-ELASTICSEARCH_USER=elastic
-ELASTICSEARCH_PASSWORD=changeme
-```
-#### MongoDB Atlas
-
-MongoDB Atlas is a fully-managed cloud database that includes vector search capabilities for AI-powered applications.
-
-1. Create a free Atlas cluster:
-- Go to the [MongoDB Atlas website](https://www.mongodb.com/cloud/atlas/register) and sign up for a free account.
-- After logging in, create a free cluster by following the on-screen instructions.
-
-2. Create a vector search index
-- Follow the instructions at [the Mongo docs](https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-type/)
-- By default, we use the collection `langgraph_retrieval_agent.default` - create the index there
-- Add an indexed filter for path `user_id`
-- **IMPORTANT**: select Atlas Vector Search NOT Atlas Search when creating the index
-Your final JSON editor configuration should look something like the following:
-
-```json
-{
-  "fields": [
-    {
-      "numDimensions": 1536,
-      "path": "embedding",
-      "similarity": "cosine",
-      "type": "vector"
-    },
-    {
-      "path": "user_id",
-      "type": "filter"
-    }
-  ]
-}
-```
-
-The exact numDimensions may differ if you select a different embedding model.
-
-2. Set up your environment:
-- In the Atlas dashboard, click on "Connect" for your cluster.
-- Choose "Connect your application" and copy the provided connection string.
-- Create a `.env` file in your project root if you haven't already.
-- Add your MongoDB Atlas connection string to the `.env` file:
-
-```
-MONGODB_URI="mongodb+srv://username:password@your-cluster-url.mongodb.net/?retryWrites=true&w=majority&appName=your-cluster-name"
-```
-
-Replace `username`, `password`, `your-cluster-url`, and `your-cluster-name` with your actual credentials and cluster information.
-#### Pinecone Serverless
-
-Pinecone is a managed, cloud-native vector database that provides long-term memory for high-performance AI applications.
-
-1. Sign up for a Pinecone account at [https://login.pinecone.io/login](https://login.pinecone.io/login) if you haven't already.
-
-2. After logging in, generate an API key from the Pinecone console.
-
-3. Create a serverless index:
-   - Choose a name for your index (e.g., "example-index")
-   - Set the dimension based on your embedding model (e.g., 1536 for OpenAI embeddings)
-   - Select "cosine" as the metric
-   - Choose "Serverless" as the index type
-   - Select your preferred cloud provider and region (e.g., AWS us-east-1)
-
-4. Once you have created your index and obtained your API key, add them to your `.env` file:
-
-```
-PINECONE_API_KEY=your-api-key
-PINECONE_INDEX_NAME=your-index-name
-```
-
-
-### Setup Model
-
-The defaults values for `response_model`, `query_model` are shown below:
-
-```yaml
-response_model: anthropic/claude-3-5-sonnet-20240620
-query_model: anthropic/claude-3-haiku-20240307
-```
-
-Follow the instructions below to get set up, or pick one of the additional options.
-
-#### Anthropic
-
-To use Anthropic's chat models:
-
-1. Sign up for an [Anthropic API key](https://console.anthropic.com/) if you haven't already.
-2. Once you have your API key, add it to your `.env` file:
-
-```
-ANTHROPIC_API_KEY=your-api-key
-```
-#### OpenAI
-
-To use OpenAI's chat models:
-
-1. Sign up for an [OpenAI API key](https://platform.openai.com/signup).
-2. Once you have your API key, add it to your `.env` file:
-```
-OPENAI_API_KEY=your-api-key
-```
-
-
-
-### Setup Embedding Model
-
-The defaults values for `embedding_model` are shown below:
-
-```yaml
-embedding_model: openai/text-embedding-3-small
-```
-
-Follow the instructions below to get set up, or pick one of the additional options.
-
-#### OpenAI
-
-To use OpenAI's embeddings:
-
-1. Sign up for an [OpenAI API key](https://platform.openai.com/signup).
-2. Once you have your API key, add it to your `.env` file:
-```
-OPENAI_API_KEY=your-api-key
-```
-
-#### Cohere
-
-To use Cohere's embeddings:
-
-1. Sign up for a [Cohere API key](https://dashboard.cohere.com/welcome/register).
-2. Once you have your API key, add it to your `.env` file:
-
+### 3. Launch LangGraph Dev or Studio bridge
+The CLI reads `langgraph.json` to learn about available graphs.
 ```bash
-COHERE_API_KEY=your-api-key
+langgraph dev
 ```
+This exposes the graphs locally (default `http://127.0.0.1:8123`). Open LangGraph Studio and point it at your dev server, or paste the URL into the hosted Studio link in the hero section to talk to your local run.
 
-
-
-
-
-<!--
-End setup instructions
--->
-
-## Using
-
-Once you've set up your retriever saved your model secrets, it's time to try it out! First, let's add some information to the index. Open studio, select the "indexer" graph from the dropdown in the top-left, provide an example user ID in the configuration at the bottom, and then add some content to chat over.
-
-```json
-[{ "page_content": "My cat knows python." }]
+### 4. Chat from the CLI (optional)
+You can also trigger the graph directly:
+```bash
+langgraph run retrieval_graph --config '{"configurable": {"user_id": "analyst-42"}}' \
+  --input '{"messages": [{"role": "user", "content": "Show me the latest CPI YoY trend."}]}'
 ```
+The `user_id` only matters when you add document retrieval. All other tools (FRED, FRASER, FOMC snapshot) work out of the box once env vars are set.
 
-When you upload content, it will be indexed under the configured user ID. You know it's complete when the indexer "delete"'s the content from its graph memory (since it's been persisted in your configured storage provider).
+## Architecture
+### Conversation loop
+`graph.py` defines a `StateGraph` with two nodes:
+- `agent`: builds a prompt from `Configuration.response_system_prompt`, injects retrieved docs + timestamps, and calls Claude Sonnet 4.5 on Bedrock. Tools are bound via the native Bedrock function-calling API exposed through `ChatBedrockConverse`.
+- `tools`: executes every tool call emitted by the model, tracks attachment payloads, and increments `tool_call_count` to guard against loops (max 20 invocations per turn).
 
-Next, open the "retrieval_graph" using the dropdown in the top-left. Ask it about your cat to confirm it can fetch the required information! If you change the `user_id` at any time, notice how it no longer has access to your information. The graph is doing simple filtering of content so you only access the information under the provided ID.
+Routing is simple: start → `agent` → optional `tools` → back to `agent` until no more tool calls are requested.
 
-## How to customize
+### Tool catalog (what is actually used)
+| Tool name | Description | Source |
+| --- | --- | --- |
+| `retrieve_documents` | Optional call into your chosen retriever (Pinecone by default). Configure later—this README focuses on the live data tools. | `retrieval.make_retriever` |
+| `fred_chart` | Pulls a FRED-rendered PNG, base64 encodes it, and returns it as an attachment so clients can render the chart inline. | `fred_tool.fetch_chart` |
+| `fred_recent_data` | Returns structured `series_data` (metadata + recent points) for downstream reasoning. | `fred_tool.fetch_recent_data` |
+| `fred_series_release_schedule` | Maps a series to its release and shares upcoming publication dates. | `fred_tool.fetch_series_release_schedule` |
+| `fred_release_structure` | Returns the tables + metadata for a given release name (e.g., "H.4.1"). | `fred_tool.fetch_release_structure_by_name` |
+| `fred_search_series` | Text search across the FRED catalog. | `fred_tool.search_series` |
+| `fred_series_correlation` | Compares YoY growth across two series and reports the strongest lead/lag window. | `fred_tool.analyze_series_correlation` |
+| `fraser_search_fomc_titles` | Fuzzy-search FOMC meeting documents from FRASER/Postgres. | `fraser_tool.search_fomc_titles` |
+| `fomc_latest_decision` | Builds an easy-to-read card for the latest (and previous) meeting from the Postgres table defined in `services.py`. | `services.get_latest_payload` |
 
-You can customize this retrieval agent template in several ways:
+### Attachments, `series_data`, and sources
+Attachments (chart images) and structured datapoints never enter the LLM prompt—they are returned alongside text so your UI can render them without additional work. `state.Series_data` accumulates JSON blocks from FRED data tools, while `sources` captures lightweight records about each tool call (IDs, query text, release info). If you log runs to LangSmith you can inspect these fields under the run metadata to debug conversations.
 
-1. **Change the retriever**: You can switch between different vector stores (Elasticsearch, MongoDB, Pinecone) by modifying the `retriever_provider` in the configuration. Each provider has its own setup instructions in the "Getting Started" section above.
+### Observability
+Set `LANGSMITH_API_KEY` and (optionally) `LANGSMITH_PROJECT` to stream every run into LangSmith. `graph.py` prints the API key and project on startup so you know tracing is working. You can still disable tracing entirely for offline experimentation.
 
-2. **Modify the embedding model**: You can change the embedding model used for document indexing and query embedding by updating the `embedding_model` in the configuration. Options include various OpenAI and Cohere models.
+## Configuration reference
+Beyond `.env`, LangGraph lets you pass configuration via `--config` or Studio. Useful keys:
 
-3. **Adjust search parameters**: Fine-tune the retrieval process by modifying the `search_kwargs` in the configuration. This allows you to control aspects like the number of documents retrieved or similarity thresholds.
+| Config key | Default | Purpose |
+| --- | --- | --- |
+| `configurable.user_id` | `<required>` | Filters document retrieval and tags stored docs. Required even if you are only using FRED/FOMC tools. |
+| `configurable.embedding_model` | `openai/text-embedding-3-small` | Only used once you configure document ingestion. |
+| `configurable.retriever_provider` | `pinecone` | Placeholder; swap to whatever vector store you wire up later. |
+| `configurable.response_system_prompt` | See `prompts.py` | Governs assistant tone + behavior. |
+| `configurable.response_model` | `openai/gpt-4.1` | Template default; the runtime actually pins Bedrock Claude via code—update `graph.py` if you want to make this configurable again. |
 
-4. **Customize the response generation**: You can modify the `response_system_prompt` to change how the agent formulates its responses. This allows you to adjust the agent's personality or add specific instructions for answer generation.
+## Development workflow
+- `make test` (or `pytest`) exercises the unit tests under `tests/`.
+- `make lint` runs Ruff format + lint plus strict mypy. Use `make format` to apply Ruff's formatter/fixes.
+- Use `langgraph dev --watch` (from the CLI) to reload graphs as you edit Python files.
+- When editing prompts or tools, remember that attachments or structured state must remain JSON-serializable.
 
-5. **Change the language model**: Update the `response_model` in the configuration to use different language models for response generation. Options include various Claude models from Anthropic, as well as models from other providers like Fireworks AI.
+## Deployment notes
+- `fly.toml` contains the production config that backs `https://my-langgraph-app.fly.dev`. Run `fly deploy` after logging in with `fly auth login` to ship updates.
+- Provide the same `.env` values (or Fly secrets) in production; at a minimum you need the AWS + FRED + Postgres variables described earlier.
+- LangGraph Cloud / Smith Studio can target either your Fly deployment or a local `langgraph dev` session—no code changes required.
 
-6. **Extend the graph**: You can add new nodes or modify existing ones in the `src/retrieval_agent/graph.py` file to introduce additional processing steps or decision points in the agent's workflow.
+## Troubleshooting
+- **Bedrock auth failures**: ensure the profile referenced in `graph.py` exists locally, or replace it with `boto3.Session(profile_name=os.environ["AWS_PROFILE"])`.
+- **FRED errors**: double-check `FRED_API_KEY` and API limits. `fredapi` raises helpful exceptions that propagate back through the tool message.
+- **Postgres connectivity**: the FRASER helpers rely on SSL defaults—if your DB requires custom SSL params, adjust `_pg_connect` helpers accordingly.
+- **Attachments not rendering**: confirm your client consumes the `attachments` array from the graph response; LangGraph Studio does this automatically.
+- **LangSmith noise**: unset `LANGSMITH_API_KEY` or export `LANGCHAIN_TRACING_V2=false` to disable tracing temporarily.
 
-7. **Add new tools**: Implement new tools or API integrations in `src/retrieval_agent/tools.py` to expand the agent's capabilities beyond simple retrieval and response generation.
-
-8. **Modify prompts**: Update the prompts used for query generation and response formulation in `src/retrieval_agent/prompts.py` to better suit your specific use case or to improve the agent's performance.
-
-Remember to test your changes thoroughly to ensure they improve the agent's performance for your specific use case.
-
-## Development
-
-While iterating on your graph, you can edit past state and rerun your app from past states to debug specific nodes. Local changes will be automatically applied via hot reload. Try adding an interrupt before the agent calls tools, updating the default system message in `src/retrieval_agent/utils.py` to take on a persona, or adding additional nodes and edges!
-
-Follow up requests will be appended to the same thread. You can create an entirely new thread, clearing previous history, using the `+` button in the top right.
-
-You can find the latest (under construction) docs on [LangGraph](https://github.com/langchain-ai/langgraph) here, including examples and other references. Using those guides can help you pick the right patterns to adapt here for your use case.
-
-LangGraph Studio also integrates with [LangSmith](https://smith.langchain.com/) for more in-depth tracing and collaboration with teammates.
-
-<!--
-Configuration auto-generated by `langgraph template lock`. DO NOT EDIT MANUALLY.
-{
-  "config_schemas": {
-    "indexer": {
-      "type": "object",
-      "properties": {
-        "embedding_model": {
-          "type": "string",
-          "default": "openai/text-embedding-3-small",
-          "description": "Name of the embedding model to use. Must be a valid embedding model name.",
-          "environment": [
-            {
-              "value": "cohere/embed-english-light-v2.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-english-light-v3.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-english-v2.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-english-v3.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-multilingual-light-v3.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-multilingual-v2.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-multilingual-v3.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "openai/text-embedding-3-large",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/text-embedding-3-small",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/text-embedding-ada-002",
-              "variables": "OPENAI_API_KEY"
-            }
-          ]
-        },
-        "retriever_provider": {
-          "enum": [
-            "elastic",
-            "elastic-local",
-            "mongodb",
-            "pinecone"
-          ],
-          "default": "elastic",
-          "description": "The vector store provider to use for retrieval. Options are 'elastic', 'pinecone', or 'mongodb'.",
-          "environment": [
-            {
-              "value": "elastic",
-              "variables": [
-                "ELASTICSEARCH_URL",
-                "ELASTICSEARCH_API_KEY"
-              ]
-            },
-            {
-              "value": "elastic-local",
-              "variables": [
-                "ELASTICSEARCH_URL",
-                "ELASTICSEARCH_USER",
-                "ELASTICSEARCH_PASSWORD"
-              ]
-            },
-            {
-              "value": "mongodb",
-              "variables": [
-                "MONGODB_URI"
-              ]
-            },
-            {
-              "value": "pinecone",
-              "variables": [
-                "PINECONE_API_KEY",
-                "PINECONE_INDEX_NAME"
-              ]
-            }
-          ],
-          "type": "string"
-        }
-      }
-    },
-    "retrieval_graph": {
-      "type": "object",
-      "properties": {
-        "embedding_model": {
-          "type": "string",
-          "default": "openai/text-embedding-3-small",
-          "description": "Name of the embedding model to use. Must be a valid embedding model name.",
-          "environment": [
-            {
-              "value": "cohere/embed-english-light-v2.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-english-light-v3.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-english-v2.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-english-v3.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-multilingual-light-v3.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-multilingual-v2.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "cohere/embed-multilingual-v3.0",
-              "variables": "COHERE_API_KEY"
-            },
-            {
-              "value": "openai/text-embedding-3-large",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/text-embedding-3-small",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/text-embedding-ada-002",
-              "variables": "OPENAI_API_KEY"
-            }
-          ]
-        },
-        "retriever_provider": {
-          "enum": [
-            "elastic",
-            "elastic-local",
-            "mongodb",
-            "pinecone"
-          ],
-          "default": "elastic",
-          "description": "The vector store provider to use for retrieval. Options are 'elastic', 'pinecone', or 'mongodb'.",
-          "environment": [
-            {
-              "value": "elastic",
-              "variables": [
-                "ELASTICSEARCH_URL",
-                "ELASTICSEARCH_API_KEY"
-              ]
-            },
-            {
-              "value": "elastic-local",
-              "variables": [
-                "ELASTICSEARCH_URL",
-                "ELASTICSEARCH_USER",
-                "ELASTICSEARCH_PASSWORD"
-              ]
-            },
-            {
-              "value": "mongodb",
-              "variables": [
-                "MONGODB_URI"
-              ]
-            },
-            {
-              "value": "pinecone",
-              "variables": [
-                "PINECONE_API_KEY",
-                "PINECONE_INDEX_NAME"
-              ]
-            }
-          ],
-          "type": "string"
-        },
-        "response_model": {
-          "type": "string",
-          "default": "anthropic/claude-3-5-sonnet-20240620",
-          "description": "The language model used for generating responses. Should be in the form: provider/model-name.",
-          "environment": [
-            {
-              "value": "anthropic/claude-1.2",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-2.0",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-2.1",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-3-5-sonnet-20240620",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-3-haiku-20240307",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-3-opus-20240229",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-3-sonnet-20240229",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-instant-1.2",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-0125",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-0301",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-0613",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-1106",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-16k",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-16k-0613",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-0125-preview",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-0314",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-0613",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-1106-preview",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-32k",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-32k-0314",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-32k-0613",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-turbo",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-turbo-preview",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-vision-preview",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4o",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4o-mini",
-              "variables": "OPENAI_API_KEY"
-            }
-          ]
-        },
-        "query_model": {
-          "type": "string",
-          "default": "anthropic/claude-3-haiku-20240307",
-          "description": "The language model used for processing and refining queries. Should be in the form: provider/model-name.",
-          "environment": [
-            {
-              "value": "anthropic/claude-1.2",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-2.0",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-2.1",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-3-5-sonnet-20240620",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-3-haiku-20240307",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-3-opus-20240229",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-3-sonnet-20240229",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "anthropic/claude-instant-1.2",
-              "variables": "ANTHROPIC_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-0125",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-0301",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-0613",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-1106",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-16k",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-3.5-turbo-16k-0613",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-0125-preview",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-0314",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-0613",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-1106-preview",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-32k",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-32k-0314",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-32k-0613",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-turbo",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-turbo-preview",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4-vision-preview",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4o",
-              "variables": "OPENAI_API_KEY"
-            },
-            {
-              "value": "openai/gpt-4o-mini",
-              "variables": "OPENAI_API_KEY"
-            }
-          ]
-        }
-      }
-    }
-  }
-}
--->
-
- https://smith.langchain.com/studio/?baseUrl=https://my-langgraph-app.fly.dev
+## Next steps
+- Wire up your preferred vector store in `retrieval.make_retriever` and start indexing documents via `index_graph.py` when you need private context.
+- Add new tools by extending `TOOL_DEFINITIONS` and handling them inside `call_tool`—follow the pattern used by the FRED helpers.
+- Swap Bedrock models or add fallbacks by adjusting the `ChatBedrockConverse` construction to read model IDs from config instead of constants.

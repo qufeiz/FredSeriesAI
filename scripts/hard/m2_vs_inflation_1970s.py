@@ -56,8 +56,8 @@ def load_series(series_id: str) -> pd.Series:
     return series.loc[window]
 
 
-m2 = load_series("M2SL")
-cpi = load_series("CPIAUCSL")
+m2 = load_series("GDPC1")
+cpi = load_series("UNRATE")
 
 df = (
     pd.concat(

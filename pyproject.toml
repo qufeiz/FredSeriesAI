@@ -12,6 +12,7 @@ dependencies = [
     "langgraph>=0.2.6",
     "langchain-openai>=0.3.32",
     "langchain-anthropic>=0.3.0",
+    "langchain-aws>=0.3.0",
     "langchain>=0.3.27",
     "langchain-fireworks>=0.1.7",
     "python-dotenv>=1.0.1",
