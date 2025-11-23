@@ -56,7 +56,7 @@ Fill in the values you actually use today:
 | `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` | Enables tracing + dataset logging in LangSmith; disable or leave blank if you prefer local-only runs. |
 | `AWS_PROFILE`, `AWS_REGION` | Profile/region with Bedrock access. `graph.py` reads `AWS_PROFILE` directly (falling back to the default boto3 credential chain if unset). |
 | `FRED_API_KEY` | Needed for every tool implemented in `fred_tool.py` (charts, datapoints, metadata, correlation). |
-| `FRED_CHART_WIDTH`, `FRED_CHART_HEIGHT` (optional) | Override the PNG dimensions generated via `fredgraph.png`. |
+<!-- | `FRED_CHART_WIDTH`, `FRED_CHART_HEIGHT` (optional) | Override the PNG dimensions generated via `fredgraph.png`. | -->
 | `PG_HOST`, `PG_PORT`, `PG_NAME`, `PG_USER`, `PG_PASS` | Required by `fraser_tool.py` and `services.py` to talk to FRASER/FOMC tables. |
 
 > `FRASER_API_KEY`, OpenSearch, or ingestion-specific variables from the original template are no longer needed unless you decide to revive those scripts.
@@ -182,16 +182,16 @@ Beyond `.env`, LangGraph lets you pass configuration via `--config` or Studio. U
 | `configurable.response_system_prompt` | See `prompts.py` | Governs assistant tone + behavior. |
 | `configurable.response_model` | `openai/gpt-4.1` | Template default; the runtime actually pins Bedrock Claude via code—update `graph.py` if you want to make this configurable again. | -->
 
-## Development workflow
+<!-- ## Development workflow
 - `make test` (or `pytest`) exercises the unit tests under `tests/`.
 - `make lint` runs Ruff format + lint plus strict mypy. Use `make format` to apply Ruff's formatter/fixes.
 - Use `langgraph dev --allow-blocking --watch` (from the CLI) to reload graphs as you edit Python files.
-- When editing prompts or tools, remember that attachments or structured state must remain JSON-serializable.
+- When editing prompts or tools, remember that attachments or structured state must remain JSON-serializable. -->
 
-## Deployment notes
-- `fly.toml` contains the production config that backs `https://my-langgraph-app.fly.dev`. Run `fly deploy` after logging in with `fly auth login` to ship updates.
-- Provide the same `.env` values (or Fly secrets) in production; at a minimum you need the AWS + FRED + Postgres variables described earlier.
-- LangGraph Cloud / Smith Studio can target either your Fly deployment or a local `langgraph dev --allow-blocking` session—no code changes required.
+<!-- ## Deployment notes -->
+<!-- - `fly.toml` contains the production config that backs `https://my-langgraph-app.fly.dev`. Run `fly deploy` after logging in with `fly auth login` to ship updates. -->
+<!-- - Provide the same `.env` values (or Fly secrets) in production; at a minimum you need the AWS + FRED + Postgres variables described earlier.
+- LangGraph Cloud / Smith Studio can target either your Fly deployment or a local `langgraph dev --allow-blocking` session—no code changes required. -->
 
 ### Terraform (App Runner + ECR)
 - Set `AWS_PROFILE`/`AWS_REGION`, copy `terraform/terraform.tfvars.example` to `terraform/terraform.tfvars`, and fill in real secrets (kept out of git).
