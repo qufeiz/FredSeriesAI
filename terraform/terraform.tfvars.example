@@ -1,0 +1,7 @@
+# Example Terraform variable file (do NOT commit real secrets)
+
+fred_api_key = "replace-me"
+pg_host      = "replace-me"
+pg_name      = "fomc"
+pg_user      = "postgres"
+pg_pass      = "replace-me"

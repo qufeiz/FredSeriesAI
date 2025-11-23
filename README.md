@@ -13,6 +13,7 @@
 - Document retrieval is wired to `retrieve_documents` and `retrieval.make_retriever`, but the focus of this README is the Bedrock + tooling experience—hook your own vector store when you are ready.
 - LangSmith tracing is enabled so every run is observable; attachments (chart images) and structured `series_data` ride outside the prompt for richer UX.
 - Ships with a Fly.io manifest (`fly.toml`) so you can deploy the same runtime that Studio uses.
+- Public App Runner endpoint (current): https://vpinmbqrjp.us-east-1.awsapprunner.com
 
 ## Repository layout
 | Path | Purpose |
@@ -191,6 +192,15 @@ Beyond `.env`, LangGraph lets you pass configuration via `--config` or Studio. U
 - `fly.toml` contains the production config that backs `https://my-langgraph-app.fly.dev`. Run `fly deploy` after logging in with `fly auth login` to ship updates.
 - Provide the same `.env` values (or Fly secrets) in production; at a minimum you need the AWS + FRED + Postgres variables described earlier.
 - LangGraph Cloud / Smith Studio can target either your Fly deployment or a local `langgraph dev --allow-blocking` session—no code changes required.
+
+### Terraform (App Runner + ECR)
+- Set `AWS_PROFILE`/`AWS_REGION`, copy `terraform/terraform.tfvars.example` to `terraform/terraform.tfvars`, and fill in real secrets (kept out of git).
+<!-- - If you already created the service by hand, import the live resources before your first apply:
+  - `terraform import aws_ecr_repository.backend arn:aws:ecr:us-east-1:<acct>:repository/fredgpt-backend`
+  - `terraform import aws_iam_role.apprunner_ecr AppRunnerECRAccessRole`
+  - `terraform import aws_iam_role.apprunner_instance AppRunner-FredGPT-InstanceRole`
+  - `terraform import aws_apprunner_service.backend arn:aws:apprunner:us-east-1:<acct>:service/fredgpt-backend/<service-id>` -->
+- Fresh deploy: `cd terraform && terraform init && terraform apply`. Secrets are stored in SSM and pulled into App Runner via `runtime_environment_secrets`; Terraform state never contains secret values.
 
 ## Troubleshooting
 - **Bedrock auth failures**: ensure `AWS_PROFILE` points to a local profile with Bedrock access (or unset it so boto3 falls back to your default credentials). A quick `aws sts get-caller-identity` should succeed before launching the graph.

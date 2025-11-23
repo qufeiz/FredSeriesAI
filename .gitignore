@@ -169,3 +169,10 @@ scripts/**/*.json
 *.csv
 *.json
 
+# local Terraform secrets
+terraform/terraform.tfvars
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfstate*
+terraform/*.tfplan
+terraform/.terraform/
