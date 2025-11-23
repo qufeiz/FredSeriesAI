@@ -6,7 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.messages import HumanMessage, AIMessage
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from supabase import create_client, Client
+
+try:
+    from supabase import create_client, Client
+except ImportError:
+    create_client = None  # type: ignore
+    Client = None  # type: ignore
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,11 +23,14 @@ from retrieval_graph.graph import graph
 supabase_url = os.getenv("SUPABASE_URL")
 supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
-if not supabase_url or not supabase_key:
-    logger.warning("Supabase credentials not found. Running without auth verification.")
-    supabase: Optional[Client] = None
-else:
+if create_client and supabase_url and supabase_key:
     supabase = create_client(supabase_url, supabase_key)
+else:
+    if not create_client:
+        logger.info("Supabase client not installed; running without auth verification.")
+    else:
+        logger.warning("Supabase credentials not found. Running without auth verification.")
+    supabase = None
 
 app = FastAPI()
 
