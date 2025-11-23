@@ -53,7 +53,7 @@ Fill in the values you actually use today:
 | Variable | Why it matters |
 | --- | --- |
 | `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` | Enables tracing + dataset logging in LangSmith; disable or leave blank if you prefer local-only runs. |
-| `AWS_PROFILE`, `AWS_REGION` | Profile/region that has Bedrock access. If you keep the hard-coded profile name in `graph.py`, make sure it exists locally. |
+| `AWS_PROFILE`, `AWS_REGION` | Profile/region with Bedrock access. `graph.py` reads `AWS_PROFILE` directly (falling back to the default boto3 credential chain if unset). |
 | `FRED_API_KEY` | Needed for every tool implemented in `fred_tool.py` (charts, datapoints, metadata, correlation). |
 | `FRED_CHART_WIDTH`, `FRED_CHART_HEIGHT` (optional) | Override the PNG dimensions generated via `fredgraph.png`. |
 | `PG_HOST`, `PG_PORT`, `PG_NAME`, `PG_USER`, `PG_PASS` | Required by `fraser_tool.py` and `services.py` to talk to FRASER/FOMC tables. |
@@ -63,7 +63,7 @@ Fill in the values you actually use today:
 ### 3. Launch LangGraph Dev or Studio bridge
 The CLI reads `langgraph.json` to learn about available graphs.
 ```bash
-langgraph dev
+langgraph dev --allow-blocking
 ```
 This exposes the graphs locally (default `http://127.0.0.1:8123`). Open LangGraph Studio and point it at your dev server, or paste the URL into the hosted Studio link in the hero section to talk to your local run.
 
@@ -192,16 +192,16 @@ Beyond `.env`, LangGraph lets you pass configuration via `--config` or Studio. U
 ## Development workflow
 - `make test` (or `pytest`) exercises the unit tests under `tests/`.
 - `make lint` runs Ruff format + lint plus strict mypy. Use `make format` to apply Ruff's formatter/fixes.
-- Use `langgraph dev --watch` (from the CLI) to reload graphs as you edit Python files.
+- Use `langgraph dev --allow-blocking --watch` (from the CLI) to reload graphs as you edit Python files.
 - When editing prompts or tools, remember that attachments or structured state must remain JSON-serializable.
 
 ## Deployment notes
 - `fly.toml` contains the production config that backs `https://my-langgraph-app.fly.dev`. Run `fly deploy` after logging in with `fly auth login` to ship updates.
 - Provide the same `.env` values (or Fly secrets) in production; at a minimum you need the AWS + FRED + Postgres variables described earlier.
-- LangGraph Cloud / Smith Studio can target either your Fly deployment or a local `langgraph dev` session—no code changes required.
+- LangGraph Cloud / Smith Studio can target either your Fly deployment or a local `langgraph dev --allow-blocking` session—no code changes required.
 
 ## Troubleshooting
-- **Bedrock auth failures**: ensure the profile referenced in `graph.py` exists locally, or replace it with `boto3.Session(profile_name=os.environ["AWS_PROFILE"])`.
+- **Bedrock auth failures**: ensure `AWS_PROFILE` points to a local profile with Bedrock access (or unset it so boto3 falls back to your default credentials). A quick `aws sts get-caller-identity` should succeed before launching the graph.
 - **FRED errors**: double-check `FRED_API_KEY` and API limits. `fredapi` raises helpful exceptions that propagate back through the tool message.
 - **Postgres connectivity**: the FRASER helpers rely on SSL defaults—if your DB requires custom SSL params, adjust `_pg_connect` helpers accordingly.
 - **Attachments not rendering**: confirm your client consumes the `attachments` array from the graph response; LangGraph Studio does this automatically.

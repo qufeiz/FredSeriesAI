@@ -30,13 +30,13 @@ from retrieval_graph.services import get_latest_payload
 from retrieval_graph.state import InputState, State
 from retrieval_graph.utils import format_docs
 
-from langsmith import Client
+# from langsmith import Client
 
-print("API key:", os.getenv("LANGSMITH_API_KEY"))
-print("Project:", os.getenv("LANGSMITH_PROJECT"))
+# print("API key:", os.getenv("LANGSMITH_API_KEY"))
+# print("Project:", os.getenv("LANGSMITH_PROJECT"))
 
-client = Client()
-print("Projects:", [p.name for p in client.list_projects()])
+# client = Client()
+# print("Projects:", [p.name for p in client.list_projects()])
 
 MAX_TOOL_CALLS = 20
 
