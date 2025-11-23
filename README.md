@@ -67,14 +67,6 @@ langgraph dev --allow-blocking
 ```
 This exposes the graphs locally (default `http://127.0.0.1:8123`). Open LangGraph Studio and point it at your dev server, or paste the URL into the hosted Studio link in the hero section to talk to your local run.
 
-### 4. Chat from the CLI (optional)
-You can also trigger the graph directly:
-```bash
-langgraph run retrieval_graph --config '{"configurable": {"user_id": "analyst-42"}}' \
-  --input '{"messages": [{"role": "user", "content": "Show me the latest CPI YoY trend."}]}'
-```
-The `user_id` only matters when you add document retrieval. All other tools (FRED, FRASER, FOMC snapshot) work out of the box once env vars are set.
-
 ## FastAPI bridge
 Prefer a REST-style entry point? Launch the bundled FastAPI server:
 ```bash
