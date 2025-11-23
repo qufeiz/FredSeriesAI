@@ -2,8 +2,8 @@
 
 > A LangGraph-based financial copilot that combines AWS Bedrock conversations with live FRED and FOMC data tools.
 
-[Open in LangGraph Studio](https://langgraph-studio.vercel.app/templates/open?githubUrl=https://github.com/langchain-ai/retrieval-agent-template)
-· [Hosted graph](https://my-langgraph-app.fly.dev) · [Studio session on Smith](https://smith.langchain.com/studio/?baseUrl=https://my-langgraph-app.fly.dev)
+<!-- [Open in LangGraph Studio](https://langgraph-studio.vercel.app/templates/open?githubUrl=https://github.com/langchain-ai/retrieval-agent-template)
+· [Hosted graph](https://my-langgraph-app.fly.dev) · [Studio session on Smith](https://smith.langchain.com/studio/?baseUrl=https://my-langgraph-app.fly.dev) -->
 
 ![Graph view in LangGraph studio UI](./static/studio_ui.png)
 
