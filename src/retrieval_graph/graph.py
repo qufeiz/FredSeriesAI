@@ -38,7 +38,7 @@ from retrieval_graph.utils import format_docs
 # client = Client()
 # print("Projects:", [p.name for p in client.list_projects()])
 
-MAX_TOOL_CALLS = 4
+MAX_TOOL_CALLS = 6
 
 TOOL_DEFINITIONS = [
     # {
@@ -253,12 +253,10 @@ async def call_model(
         model="us.anthropic.claude-sonnet-4-5-20250929-v1:0",
         #model="meta.llama3-1-70b-instruct-v1:0",
         temperature=0,
-        # model_kwargs={
-        # "guardrailConfig": {
-        #     "guardrailIdentifier": guardrail_id,
-        #     "guardrailVersion": guardrail_version,
-        #     "trace": "enabled"
-        #     }
+        # guardrailConfig={
+        # "guardrailIdentifier": guardrail_id,
+        # "guardrailVersion": guardrail_version,
+        # "trace": "enabled",
         # }
     ).bind_tools(TOOL_DEFINITIONS)
 

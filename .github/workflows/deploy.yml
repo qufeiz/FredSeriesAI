@@ -1,0 +1,56 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::112393354239:role/GitHubActions-FredGPT-Backend
+        aws-region: us-east-1
+
+    - name: Export Terraform env vars
+      run: |
+        echo "TF_VAR_fred_api_key=${{ secrets.FRED_API_KEY }}" >> $GITHUB_ENV
+        echo "TF_VAR_pg_host=${{ secrets.PG_HOST }}" >> $GITHUB_ENV
+        echo "TF_VAR_pg_name=${{ secrets.PG_NAME }}" >> $GITHUB_ENV
+        echo "TF_VAR_pg_user=${{ secrets.PG_USER }}" >> $GITHUB_ENV
+        echo "TF_VAR_pg_pass=${{ secrets.PG_PASS }}" >> $GITHUB_ENV
+
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and push Docker image
+      env:
+        ECR_REGISTRY: 112393354239.dkr.ecr.us-east-1.amazonaws.com
+        IMAGE: fredgpt-backend
+      run: |
+        docker build -t $ECR_REGISTRY/$IMAGE:latest .
+        docker push $ECR_REGISTRY/$IMAGE:latest
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.14.0
+
+    - name: Terraform Init
+      run: terraform -chdir=terraform init
+
+    - name: Terraform Plan
+      run: terraform -chdir=terraform plan
+
+    - name: Terraform Apply
+      run: terraform -chdir=terraform apply -auto-approve
