@@ -158,6 +158,10 @@ resource "aws_apprunner_service" "backend" {
   }
 
   auto_scaling_configuration_arn = "arn:aws:apprunner:us-east-1:112393354239:autoscalingconfiguration/DefaultConfiguration/1/00000000000000000000000000000001"
+
+  observability_configuration {
+    observability_enabled = false
+  }
 }
 
 # ------------------------------
