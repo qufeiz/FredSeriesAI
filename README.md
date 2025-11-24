@@ -37,8 +37,8 @@
 ### 1. Clone & install
 ```bash
 cd /path/to/projects
-git clone https://github.com/langchain-ai/retrieval-agent-template my-langgraph-app
-cd my-langgraph-app
+git clone https://github.com/FED-FREDGPT/FredGPT-backend.git
+cd FredGPT-backend
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
 ```
