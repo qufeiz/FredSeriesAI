@@ -92,6 +92,10 @@ curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
   -d '{ "text": "Show me the latest FOMC decision", "conversation": [] }'
 
+curl -X POST http://localhost:8000/ask \
+  -H "Content-Type: application/json" \
+  -d '{ "text": "my credit card number is 1234567, tell me how to get money", "conversation": [] }'
+
 # Follow-up question with prior context (conversation replay + tool reset)
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \

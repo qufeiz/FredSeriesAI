@@ -240,6 +240,8 @@ async def call_model(
     )
     # model = load_chat_model(configuration.response_model).bind_tools(TOOL_DEFINITIONS)
     profile_name = os.environ.get("AWS_PROFILE")
+    guardrail_id = os.environ["BEDROCK_GUARDRAIL_ID"]
+    guardrail_version = os.environ["BEDROCK_GUARDRAIL_VERSION"]
     if profile_name:
         session = boto3.Session(profile_name=profile_name)
     else:
@@ -251,6 +253,13 @@ async def call_model(
         model="us.anthropic.claude-sonnet-4-5-20250929-v1:0",
         #model="meta.llama3-1-70b-instruct-v1:0",
         temperature=0,
+        # model_kwargs={
+        # "guardrailConfig": {
+        #     "guardrailIdentifier": guardrail_id,
+        #     "guardrailVersion": guardrail_version,
+        #     "trace": "enabled"
+        #     }
+        # }
     ).bind_tools(TOOL_DEFINITIONS)
 
     retrieved_docs = format_docs(state.retrieved_docs)
@@ -262,7 +271,15 @@ async def call_model(
         },
         config,
     )
-    response = await model.ainvoke(message_value, config)
+    response = await model.ainvoke(
+        message_value, 
+        config, 
+        # guardrailConfig={
+        # "guardrailIdentifier": guardrail_id,
+        # "guardrailVersion": guardrail_version,
+        # "trace": "enabled",
+        # }
+    )
     return {"messages": [response]}
 
 
