@@ -38,29 +38,29 @@ from retrieval_graph.utils import format_docs
 # client = Client()
 # print("Projects:", [p.name for p in client.list_projects()])
 
-MAX_TOOL_CALLS = 20
+MAX_TOOL_CALLS = 4
 
 TOOL_DEFINITIONS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "retrieve_documents",
-            "description": (
-                "Use this tool to search the indexed knowledge base for information "
-                "relevant to the user's question. Provide a concise natural language query."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "Search query to retrieve supporting documents.",
-                    }
-                },
-                "required": ["query"],
-            },
-        },
-    },
+    # {
+    #     "type": "function",
+    #     "function": {
+    #         "name": "retrieve_documents",
+    #         "description": (
+    #             "Use this tool to search the indexed knowledge base for information "
+    #             "relevant to the user's question. Provide a concise natural language query."
+    #         ),
+    #         "parameters": {
+    #             "type": "object",
+    #             "properties": {
+    #                 "query": {
+    #                     "type": "string",
+    #                     "description": "Search query to retrieve supporting documents.",
+    #                 }
+    #             },
+    #             "required": ["query"],
+    #         },
+    #     },
+    # },
     {
         "type": "function",
         "function": {

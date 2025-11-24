@@ -60,6 +60,14 @@ Fill in the values you actually use today:
 
 > `FRASER_API_KEY`, OpenSearch, or ingestion-specific variables from the original template are no longer needed unless you decide to revive those scripts.
 
+### AWS SSO quickstart
+If you use AWS SSO, initialize your CLI profile and log in:
+```bash
+aws configure sso # create your profile (sso_start_url: https://stlfrb.awsapps.com/start)
+aws sso login --profile AWSAdministratorAccess-112393354239 # use your profile name
+```
+During `aws configure sso` supply your org values (e.g., start URL, SSO region, account ID, role name, preferred profile name). Subsequent CLI calls (including Terraform) will pick up the saved profile.
+
 ### 3. Launch LangGraph Dev or Studio bridge
 The CLI reads `langgraph.json` to learn about available graphs.
 ```bash
@@ -147,7 +155,7 @@ Each `/ask` response returns:
 ### Conversation loop
 `graph.py` defines a `StateGraph` with two nodes:
 - `agent`: builds a prompt from `Configuration.response_system_prompt`, injects retrieved docs + timestamps, and calls Claude Sonnet 4.5 on Bedrock. Tools are bound via the native Bedrock function-calling API exposed through `ChatBedrockConverse`.
-- `tools`: executes every tool call emitted by the model, tracks attachment payloads, and increments `tool_call_count` to guard against loops (max 20 invocations per turn).
+- `tools`: executes every tool call emitted by the model, tracks attachment payloads, and increments `tool_call_count` to guard against loops.
 
 Routing is simple: start → `agent` → optional `tools` → back to `agent` until no more tool calls are requested.
 
