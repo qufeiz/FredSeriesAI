@@ -12,7 +12,6 @@
 - Built-in tools cover FRED charts, recent datapoints, release metadata, FRASER/Postgres searches, and a live "latest FOMC decision" card.
 - Document retrieval is wired to `retrieve_documents` and `retrieval.make_retriever`, but the focus of this README is the Bedrock + tooling experience—hook your own vector store when you are ready.
 - LangSmith tracing is enabled so every run is observable; attachments (chart images) and structured `series_data` ride outside the prompt for richer UX.
-- Ships with a Fly.io manifest (`fly.toml`) so you can deploy the same runtime that Studio uses.
 - Public App Runner endpoint (current): https://vpinmbqrjp.us-east-1.awsapprunner.com
 
 ## Repository layout
