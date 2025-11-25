@@ -1,0 +1,47 @@
+name: Integration Live
+
+on:
+  schedule:
+    - cron: "37 14 * * *" # Run at 7:37 AM Pacific Time (14:37 UTC) every day
+  workflow_dispatch: # Allows triggering the workflow manually in GitHub UI
+
+# If another scheduled run starts while this workflow is still running,
+# cancel the earlier run in favor of the next run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-test:
+    name: Integration Tests live
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv venv
+          uv pip install -r pyproject.toml
+          uv pip install -U pytest-asyncio
+
+      - name: Run live graph test
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          PG_HOST: ${{ secrets.PG_HOST }}
+          PG_NAME: ${{ secrets.PG_NAME }}
+          PG_USER: ${{ secrets.PG_USER }}
+          PG_PASS: ${{ secrets.PG_PASS }}
+          BEDROCK_GUARDRAIL_ID: ${{ secrets.BEDROCK_GUARDRAIL_ID }}
+          BEDROCK_GUARDRAIL_VERSION: ${{ secrets.BEDROCK_GUARDRAIL_VERSION }}
+        run: |
+          uv run pytest tests/integration_tests/test_graph_live.py
