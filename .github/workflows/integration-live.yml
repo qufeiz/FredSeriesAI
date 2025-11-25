@@ -5,6 +5,10 @@ on:
     - cron: "37 14 * * *" # Run at 7:37 AM Pacific Time (14:37 UTC) every day
   workflow_dispatch: # Allows triggering the workflow manually in GitHub UI
 
+permissions:
+  id-token: write
+  contents: read
+
 # If another scheduled run starts while this workflow is still running,
 # cancel the earlier run in favor of the next run.
 concurrency:
@@ -27,11 +31,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::112393354239:role/GitHubActions-FredGPT-Backend
+          aws-region: us-east-1
+
       - name: Install dependencies
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           uv venv
-          uv pip install -r pyproject.toml
+          uv pip install -e .
           uv pip install -U pytest-asyncio
 
       - name: Run live graph test
