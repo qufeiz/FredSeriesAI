@@ -48,6 +48,18 @@ resource "aws_ssm_parameter" "pg_user" {
   value = var.pg_user
 }
 
+resource "aws_ssm_parameter" "bedrock_guardrail_id" {
+  name  = "/fredgpt/BEDROCK_GUARDRAIL_ID"
+  type  = "SecureString"
+  value = var.bedrock_guardrail_id
+}
+
+resource "aws_ssm_parameter" "bedrock_guardrail_version" {
+  name  = "/fredgpt/BEDROCK_GUARDRAIL_VERSION"
+  type  = "SecureString"
+  value = var.bedrock_guardrail_version
+}
+
 resource "aws_ssm_parameter" "pg_pass" {
   name  = "/fredgpt/PG_PASS"
   type  = "SecureString"
@@ -134,6 +146,8 @@ resource "aws_apprunner_service" "backend" {
           PG_NAME      = aws_ssm_parameter.pg_name.arn
           PG_USER      = aws_ssm_parameter.pg_user.arn
           PG_PASS      = aws_ssm_parameter.pg_pass.arn
+          BEDROCK_GUARDRAIL_ID = aws_ssm_parameter.bedrock_guardrail_id.arn
+          BEDROCK_GUARDRAIL_VERSION = aws_ssm_parameter.bedrock_guardrail_version.arn
         }
       }
 
@@ -189,6 +203,16 @@ variable "pg_user" {
 }
 
 variable "pg_pass" {
+  type      = string
+  sensitive = true
+}
+
+variable "bedrock_guardrail_id" {
+  type      = string
+  sensitive = true
+}
+
+variable "bedrock_guardrail_version" {
   type      = string
   sensitive = true
 }

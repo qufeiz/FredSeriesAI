@@ -238,10 +238,9 @@ async def call_model(
             ("placeholder", "{messages}"),
         ]
     )
-    # model = load_chat_model(configuration.response_model).bind_tools(TOOL_DEFINITIONS)
     profile_name = os.environ.get("AWS_PROFILE")
-    guardrail_id = os.environ["BEDROCK_GUARDRAIL_ID"]
-    guardrail_version = os.environ["BEDROCK_GUARDRAIL_VERSION"]
+    guardrail_id = os.environ.get("BEDROCK_GUARDRAIL_ID")
+    guardrail_version = os.environ.get("BEDROCK_GUARDRAIL_VERSION")
     if profile_name:
         session = boto3.Session(profile_name=profile_name)
     else:
