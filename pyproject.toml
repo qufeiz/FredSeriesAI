@@ -47,8 +47,7 @@ extend-exclude = ["scripts"]
 lint.select = [
     "E",
     "F",
-    "I",
-    "UP"
+    "I"
 ]
 lint.ignore = [
     "E402", # allow imports after sys.path tweaks in tests

@@ -25,7 +25,7 @@ async def test_graph_live_roundtrip() -> None:
         },
         {"configurable": {"user_id": "integration-test-user"}},
     )
-    
+
     response = str(result["messages"][-1].content)
     expect(response.lower()).to_contain("fomc")
 
