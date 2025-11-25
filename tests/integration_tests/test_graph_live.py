@@ -1,11 +1,8 @@
-import os
-
 import pytest
 from langchain_core.messages import HumanMessage
+from langsmith import expect
 
 from retrieval_graph import graph
-from langsmith import expect, unit
-
 
 # live = pytest.mark.skipif(
 #     os.getenv("RUN_LIVE_GRAPH_TEST") != "1",
@@ -15,7 +12,7 @@ from langsmith import expect, unit
 
 # @live
 @pytest.mark.asyncio
-@unit
+# @unit
 async def test_graph_live_roundtrip() -> None:
     """Exercise the full graph against live Bedrock/FRED if enabled."""
     result = await graph.ainvoke(
