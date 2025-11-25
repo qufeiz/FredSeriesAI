@@ -1,14 +1,15 @@
 import logging
 import os
 from typing import Dict, List, Optional
-from fastapi import FastAPI, HTTPException, Depends, Header
-from fastapi.middleware.cors import CORSMiddleware
-from langchain_core.messages import HumanMessage, AIMessage
-from pydantic import BaseModel
+
 from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from langchain_core.messages import AIMessage, HumanMessage
+from pydantic import BaseModel
 
 try:
-    from supabase import create_client, Client
+    from supabase import Client, create_client
 except ImportError:
     create_client = None  # type: ignore
     Client = None  # type: ignore
@@ -138,4 +139,5 @@ async def ask(query: Query, current_user: dict = Depends(get_current_user)):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("api_server:app", host="0.0.0.0", port=8000, reload=True)

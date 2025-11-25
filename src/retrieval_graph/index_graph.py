@@ -11,9 +11,7 @@ from retrieval_graph.configuration import IndexConfiguration
 from retrieval_graph.state import IndexState
 
 
-def ensure_docs_have_user_id(
-    docs: Sequence[Document], config: RunnableConfig
-) -> list[Document]:
+def ensure_docs_have_user_id(docs: Sequence[Document], config: RunnableConfig) -> list[Document]:
     """Ensure that all documents have a user_id in their metadata.
 
         docs (Sequence[Document]): A sequence of Document objects to process.
@@ -23,17 +21,10 @@ def ensure_docs_have_user_id(
         list[Document]: A new list of Document objects with updated metadata.
     """
     user_id = config["configurable"]["user_id"]
-    return [
-        Document(
-            page_content=doc.page_content, metadata={**doc.metadata, "user_id": user_id}
-        )
-        for doc in docs
-    ]
+    return [Document(page_content=doc.page_content, metadata={**doc.metadata, "user_id": user_id}) for doc in docs]
 
 
-async def index_docs(
-    state: IndexState, *, config: Optional[RunnableConfig] = None
-) -> dict[str, str]:
+async def index_docs(state: IndexState, *, config: Optional[RunnableConfig] = None) -> dict[str, str]:
     """Asynchronously index documents in the given state using the configured retriever.
 
     This function takes the documents from the state, ensures they have a user ID,

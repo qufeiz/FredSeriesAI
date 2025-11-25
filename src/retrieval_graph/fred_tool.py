@@ -7,9 +7,9 @@ from typing import Any
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
-import requests
 import numpy as np
 import pandas as pd
+import requests
 from dotenv import load_dotenv
 from fredapi import Fred
 
@@ -42,9 +42,7 @@ class FredClient:
     def __init__(self) -> None:
         api_key = os.getenv("FRED_API_KEY")
         if not api_key:
-            raise RuntimeError(
-                "FRED_API_KEY is required to call FRED tools but is not set."
-            )
+            raise RuntimeError("FRED_API_KEY is required to call FRED tools but is not set.")
         self._fred = Fred(api_key=api_key)
 
     def get_series_snapshot(
@@ -113,9 +111,7 @@ def _download_chart_image(series_id: str) -> tuple[str, bytes]:
     return chart_url, data
 
 
-def build_chart_attachment(
-    snapshot: SeriesSnapshot, chart_bytes: bytes, chart_url: str
-) -> dict[str, Any]:
+def build_chart_attachment(snapshot: SeriesSnapshot, chart_bytes: bytes, chart_url: str) -> dict[str, Any]:
     """Generate a chart attachment payload using FRED-rendered image bytes."""
     encoded = base64.b64encode(chart_bytes).decode("utf-8")
 
@@ -129,9 +125,7 @@ def build_chart_attachment(
     }
 
 
-def build_series_datablock(
-    snapshot: SeriesSnapshot, *, latest_points: int = 12
-) -> dict[str, Any]:
+def build_series_datablock(snapshot: SeriesSnapshot, *, latest_points: int = 12) -> dict[str, Any]:
     """Return structured datapoints for downstream reasoning."""
     observations = snapshot.latest(latest_points)
     return {
@@ -169,10 +163,7 @@ def fetch_recent_data(series_id: str, *, latest_points: int = 12) -> dict[str, A
         snapshot = get_fred_client().get_series_snapshot(series_id)
         datablock = build_series_datablock(snapshot, latest_points=latest_points)
         return {
-            "message": (
-                f"Retrieved {len(datablock['points'])} recent data points for "
-                f"{snapshot.title} ({series_id})."
-            ),
+            "message": (f"Retrieved {len(datablock['points'])} recent data points for {snapshot.title} ({series_id})."),
             "series_data": [datablock],
         }
     except Exception as exc:  # noqa: BLE001
@@ -408,19 +399,13 @@ def fetch_series_release_schedule(series_id: str) -> dict[str, Any]:
         dates = schedule_data.get("release_dates", [])
 
         year_candidates = [
-            int(item["date"][:4])
-            for item in dates
-            if isinstance(item.get("date"), str) and item["date"][:4].isdigit()
+            int(item["date"][:4]) for item in dates if isinstance(item.get("date"), str) and item["date"][:4].isdigit()
         ]
         latest_year = max(year_candidates) if year_candidates else None
         filtered_dates = [
             item
             for item in dates
-            if latest_year is None
-            or (
-                isinstance(item.get("date"), str)
-                and item["date"].startswith(str(latest_year))
-            )
+            if latest_year is None or (isinstance(item.get("date"), str) and item["date"].startswith(str(latest_year)))
         ]
 
         today_str = datetime.utcnow().strftime("%Y-%m-%d")

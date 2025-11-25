@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 from fastmcp import FastMCP
-
 from services import get_latest_payload
 
 app = FastMCP("fomc-decisions")

@@ -59,9 +59,7 @@ def reduce_docs(
         coerced = []
         for item in new:
             if isinstance(item, str):
-                coerced.append(
-                    Document(page_content=item, metadata={"id": str(uuid.uuid4())})
-                )
+                coerced.append(Document(page_content=item, metadata={"id": str(uuid.uuid4())}))
             elif isinstance(item, dict):
                 coerced.append(Document(**item))
             else:
@@ -204,14 +202,10 @@ class State(InputState):
     retrieved_docs: list[Document] = field(default_factory=list)
     """Populated by the retriever. This is a list of documents that the agent can reference."""
 
-    attachments: Annotated[list[dict[str, Any]], add_attachments] = field(
-        default_factory=list
-    )
+    attachments: Annotated[list[dict[str, Any]], add_attachments] = field(default_factory=list)
     """Out-of-band payloads (e.g., chart images) returned to clients without entering the LLM prompt."""
 
-    series_data: Annotated[list[dict[str, Any]], add_series_data] = field(
-        default_factory=list
-    )
+    series_data: Annotated[list[dict[str, Any]], add_series_data] = field(default_factory=list)
     """Structured datapoints from FRED data tool, available for downstream reasoning."""
 
     tool_call_count: int = 0

@@ -17,15 +17,15 @@ from langgraph.graph import StateGraph
 
 from retrieval_graph import retrieval
 from retrieval_graph.configuration import Configuration
+from retrieval_graph.fraser_tool import search_fomc_titles
 from retrieval_graph.fred_tool import (
+    analyze_series_correlation,
     fetch_chart,
     fetch_recent_data,
-    fetch_series_release_schedule,
     fetch_release_structure_by_name,
-    analyze_series_correlation,
+    fetch_series_release_schedule,
     search_series,
 )
-from retrieval_graph.fraser_tool import search_fomc_titles
 from retrieval_graph.services import get_latest_payload
 from retrieval_graph.state import InputState, State
 from retrieval_graph.utils import format_docs
@@ -105,9 +105,7 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "fred_series_release_schedule",
-            "description": (
-                "Resolve a FRED series to its release and return upcoming release dates."
-            ),
+            "description": ("Resolve a FRED series to its release and return upcoming release dates."),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -124,9 +122,7 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "fred_release_structure",
-            "description": (
-                "Fetch release metadata and table structure by release name (e.g. H.4.1)."
-            ),
+            "description": ("Fetch release metadata and table structure by release name (e.g. H.4.1)."),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -227,9 +223,7 @@ def _summarize_documents(docs: Iterable[Document], *, max_docs: int = 3) -> str:
     return format_docs(limited)
 
 
-async def call_model(
-    state: State, *, config: RunnableConfig
-) -> dict[str, Any]:
+async def call_model(state: State, *, config: RunnableConfig) -> dict[str, Any]:
     """Ask the model what to do next (answer or call tools)."""
     configuration = Configuration.from_runnable_config(config)
     prompt = ChatPromptTemplate.from_messages(
@@ -246,11 +240,11 @@ async def call_model(
     else:
         session = boto3.Session()
     bedrock_client = session.client("bedrock-runtime", region_name="us-east-1")
-    
+
     model = ChatBedrockConverse(
         client=bedrock_client,
         model="us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-        #model="meta.llama3-1-70b-instruct-v1:0",
+        # model="meta.llama3-1-70b-instruct-v1:0",
         temperature=0,
         # guardrailConfig={
         # "guardrailIdentifier": guardrail_id,
@@ -269,20 +263,18 @@ async def call_model(
         config,
     )
     response = await model.ainvoke(
-        message_value, 
-        config, 
-        # guardrailConfig={
-        # "guardrailIdentifier": guardrail_id,
-        # "guardrailVersion": guardrail_version,
-        # "trace": "enabled",
-        # }
+        message_value,
+        config,
+        guardrailConfig={
+            "guardrailIdentifier": guardrail_id,
+            "guardrailVersion": guardrail_version,
+            "trace": "enabled",
+        },
     )
     return {"messages": [response]}
 
 
-async def call_tool(
-    state: State, *, config: RunnableConfig
-) -> dict[str, Any]:
+async def call_tool(state: State, *, config: RunnableConfig) -> dict[str, Any]:
     """Execute tool calls emitted by the model."""
     if not state.messages:
         return {}
@@ -306,10 +298,7 @@ async def call_tool(
         source_record: dict[str, Any] | None = None
 
         if tool_call_count >= MAX_TOOL_CALLS:
-            content = (
-                "Tool-call limit reached. Provide the best answer you can with the "
-                "information already collected."
-            )
+            content = "Tool-call limit reached. Provide the best answer you can with the information already collected."
             tool_messages.append(
                 ToolMessage(
                     content=content,
@@ -381,9 +370,7 @@ async def call_tool(
         elif name == "fred_series_release_schedule":
             series_id = args.get("series_id")
             if not series_id:
-                content = (
-                    "A FRED series_id is required to fetch the series release schedule."
-                )
+                content = "A FRED series_id is required to fetch the series release schedule."
             else:
                 payload = fetch_series_release_schedule(series_id)
                 schedule = payload.get("release_schedule", [])
@@ -408,9 +395,7 @@ async def call_tool(
         elif name == "fred_release_structure":
             release_name = args.get("release_name")
             if not release_name:
-                content = (
-                    "A release_name is required to fetch release structure metadata."
-                )
+                content = "A release_name is required to fetch release structure metadata."
             else:
                 payload = fetch_release_structure_by_name(release_name)
                 message = payload.get(

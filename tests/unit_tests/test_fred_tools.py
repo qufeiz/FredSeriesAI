@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 import pytest
 
@@ -30,10 +29,7 @@ def clear_fred_client_cache() -> None:
 
 
 def _make_snapshot(count: int = 6) -> fred_tool.SeriesSnapshot:
-    observations = [
-        {"date": f"2024-0{month}-01", "value": float(month)}
-        for month in range(1, count + 1)
-    ]
+    observations = [{"date": f"2024-0{month}-01", "value": float(month)} for month in range(1, count + 1)]
     return fred_tool.SeriesSnapshot(
         series_id="TEST_SERIES",
         title="Test Series",

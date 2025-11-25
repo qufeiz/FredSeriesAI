@@ -26,9 +26,7 @@ class IndexConfiguration:
         {"__template_metadata__": {"kind": "embeddings"}},
     ] = field(
         default="openai/text-embedding-3-small",
-        metadata={
-            "description": "Name of the embedding model to use. Must be a valid embedding model name."
-        },
+        metadata={"description": "Name of the embedding model to use. Must be a valid embedding model name."},
     )
 
     retriever_provider: Annotated[
@@ -43,15 +41,11 @@ class IndexConfiguration:
 
     search_kwargs: dict[str, Any] = field(
         default_factory=dict,
-        metadata={
-            "description": "Additional keyword arguments to pass to the search function of the retriever."
-        },
+        metadata={"description": "Additional keyword arguments to pass to the search function of the retriever."},
     )
 
     @classmethod
-    def from_runnable_config(
-        cls: Type[T], config: Optional[RunnableConfig] = None
-    ) -> T:
+    def from_runnable_config(cls: Type[T], config: Optional[RunnableConfig] = None) -> T:
         """Create an IndexConfiguration instance from a RunnableConfig object.
 
         Args:
@@ -88,9 +82,7 @@ class Configuration(IndexConfiguration):
 
     query_system_prompt: str = field(
         default=prompts.QUERY_SYSTEM_PROMPT,
-        metadata={
-            "description": "The system prompt used for processing and refining queries."
-        },
+        metadata={"description": "The system prompt used for processing and refining queries."},
     )
 
     query_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
