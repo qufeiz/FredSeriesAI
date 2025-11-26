@@ -10,7 +10,7 @@
 ## TL;DR
 - Conversational loop runs on LangGraph with a single `StateGraph` (see `src/retrieval_graph/graph.py`), powered by `ChatBedrockConverse` (`us.anthropic.claude-sonnet-4-5-20250929-v1:0`).
 - Built-in tools cover FRED charts, recent datapoints, release metadata, FRASER/Postgres searches, and a live "latest FOMC decision" card.
-- Document retrieval is wired to `retrieve_documents` and `retrieval.make_retriever`, but the focus of this README is the Bedrock + tooling experience—hook your own vector store when you are ready.
+<!-- - Document retrieval is wired to `retrieve_documents` and `retrieval.make_retriever`, but the focus of this README is the Bedrock + tooling experience—hook your own vector store when you are ready. -->
 - LangSmith tracing is enabled so every run is observable; attachments (chart images) and structured `series_data` ride outside the prompt for richer UX.
 - Public App Runner endpoint (current): https://vpinmbqrjp.us-east-1.awsapprunner.com
 
@@ -22,8 +22,8 @@
 | `src/retrieval_graph/fred_tool.py` | Handles FRED charts, datapoints, correlation, and release metadata via the official API. |
 | `src/retrieval_graph/fraser_tool.py` | Connects to your FRASER-backed Postgres instance for FOMC title search. |
 | `src/retrieval_graph/services.py` | Builds the "latest FOMC decision" snapshot from Postgres data. |
-| `src/retrieval_graph/index_graph.py` | (Optional) single-node index flow for uploading private documents. Left intact but not needed to run the chat bot. |
-| `langgraph.json` | Declares the deployable graphs for the LangGraph CLI (`indexer` and `retrieval_graph`). |
+<!-- | `src/retrieval_graph/index_graph.py` | (Optional) single-node index flow for uploading private documents. Left intact but not needed to run the chat bot. | -->
+| `langgraph.json` | Declares the deployable graphs for the LangGraph CLI (`retrieval_graph`). |
 | `pyproject.toml` | Python dependencies; install the project in editable mode for development. |
 
 ## Prerequisites
@@ -167,10 +167,18 @@ Each `/ask` response returns:
 
 Routing is simple: start → `agent` → optional `tools` → back to `agent` until no more tool calls are requested.
 
+### FRASER / Postgres data
+- The FRASER/FOMC Postgres DB lives on AWS RDS (e.g., `fomc-db.c6voia0autyx.us-east-1.rds.amazonaws.com`), this is seperate from the Opensearch DB specifically built for quick access to FOMC. Supply `PG_HOST/PG_PORT/PG_NAME/PG_USER/PG_PASS` via env/SSM (managed by terraform).
+- `scripts/fraser/index_fraser.py` loads the FRASER FOMC catalog into `fomc_items` (columns: `id`, `titleInfo`, `originInfo`, `location`, `recordInfo`) from `scripts/fraser/output/title_677_items.json`.
+- `scripts/fraser/extractor/load_meetings.py` upserts meeting metadata into `fomc_meetings` (PK `meeting_id`, `meeting_date`, rate fields, votes) from JSON files under `scripts/fraser/extractor/meetings`.
+- Runtime tools:
+  - `fraser_search_fomc_titles` queries `fomc_items`.
+  - `fomc_latest_decision` uses `services.get_latest_payload()` to read `fomc_meetings`.
+
 ### Tool catalog (what is actually used)
 | Tool name | Description | Source |
 | --- | --- | --- |
-| `retrieve_documents` | Optional call into your chosen retriever (Pinecone by default). Configure later—this README focuses on the live data tools. | `retrieval.make_retriever` |
+<!-- | `retrieve_documents` | Optional call into your chosen retriever (Pinecone by default). Configure later—this README focuses on the live data tools. | `retrieval.make_retriever` | -->
 | `fred_chart` | Pulls a FRED-rendered PNG, base64 encodes it, and returns it as an attachment so clients can render the chart inline. | `fred_tool.fetch_chart` |
 | `fred_recent_data` | Returns structured `series_data` (metadata + recent points) for downstream reasoning. | `fred_tool.fetch_recent_data` |
 | `fred_series_release_schedule` | Maps a series to its release and shares upcoming publication dates. | `fred_tool.fetch_series_release_schedule` |
@@ -223,10 +231,6 @@ Beyond `.env`, LangGraph lets you pass configuration via `--config` or Studio. U
 - `integration-tests.yml` runs the live graph test daily at 14:37 UTC (and on manual trigger); it assumes the same OIDC role plus FRED/PG/guardrail secrets in GitHub Secrets.
 - `integration-live.yml` is an extra manual-only entry point for the live graph test when you want to trigger it on demand.
 
-### FRASER / Postgres data
-- `scripts/fraser/index_fraser.py` loads the FRASER FOMC catalog into `fomc_items` (columns: `id`, `titleInfo`, `originInfo`, `location`, `recordInfo`). Update the connection values before running; source data lives at `scripts/fraser/output/title_677_items.json`.
-- `scripts/fraser/extractor/load_meetings.py` upserts meeting metadata into `fomc_meetings` (PK `meeting_id`, `meeting_date`, rate fields, votes) from JSON files under `scripts/fraser/extractor/meetings`. It reads `PG_HOST/PG_PORT/PG_NAME/PG_USER/PG_PASS` from the environment.
-
 ## Troubleshooting
 - **Bedrock auth failures**: ensure `AWS_PROFILE` points to a local profile with Bedrock access (or unset it so boto3 falls back to your default credentials). A quick `aws sts get-caller-identity` should succeed before launching the graph.
 - **FRED errors**: double-check `FRED_API_KEY` and API limits. `fredapi` raises helpful exceptions that propagate back through the tool message.
@@ -235,6 +239,6 @@ Beyond `.env`, LangGraph lets you pass configuration via `--config` or Studio. U
 - **LangSmith noise**: unset `LANGSMITH_API_KEY` or export `LANGCHAIN_TRACING_V2=false` to disable tracing temporarily.
 
 ## Next steps
-- Wire up your preferred vector store in `retrieval.make_retriever` and start indexing documents via `index_graph.py` when you need private context.
+<!-- - Wire up your preferred vector store in `retrieval.make_retriever` and start indexing documents via `index_graph.py` when you need private context. -->
 - Add new tools by extending `TOOL_DEFINITIONS` and handling them inside `call_tool`—follow the pattern used by the FRED helpers.
 - Swap Bedrock models or add fallbacks by adjusting the `ChatBedrockConverse` construction to read model IDs from config instead of constants.
