@@ -27,7 +27,7 @@
 | `pyproject.toml` | Python dependencies; install the project in editable mode for development. |
 
 ## Prerequisites
-- Python 3.9+ and a modern virtual environment tool (e.g., `uv`, `pip`, or `conda`).
+- Python 3.11+ and a modern virtual environment tool (e.g., `uv`, `pip`, or `conda`).
 - AWS account with Bedrock access to Anthropic Claude models and a configured profile (the code references `AWSAdministratorAccess-112393354239`—change it or expose the same profile on your machine).
 - FRED API key for charts/data (`FRED_API_KEY`).
 - Network access + credentials for the FRASER/Postgres databases that hold FOMC items and meeting decisions.
@@ -91,6 +91,10 @@ Once the server is running, try a few `curl` calls:
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
   -d '{ "text": "Show me the latest FOMC decision", "conversation": [] }'
+
+curl -X POST https://vpinmbqrjp.us-east-1.awsapprunner.com/ask \
+  -H "Content-Type: application/json" \
+  -d '{ "text": "Show me the chart of GPD", "conversation": [] }'
 
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
@@ -212,6 +216,16 @@ Beyond `.env`, LangGraph lets you pass configuration via `--config` or Studio. U
   - `terraform import aws_iam_role.apprunner_instance AppRunner-FredGPT-InstanceRole`
   - `terraform import aws_apprunner_service.backend arn:aws:apprunner:us-east-1:<acct>:service/fredgpt-backend/<service-id>` -->
 - Fresh deploy: `cd terraform && terraform init && terraform apply`. Secrets are stored in SSM and pulled into App Runner via `runtime_environment_secrets`; Terraform state never contains secret values.
+
+### CI/CD & AWS
+- `ci.yml` runs Ruff + a minimal pytest (`test_api_basic.py`) on push/PR. Other tests are currently excluded.
+- `deploy.yml` builds/pushes the ECR image and runs Terraform using the GitHub Actions OIDC role `arn:aws:iam::112393354239:role/GitHubActions-FredGPT-Backend` in `us-east-1`.
+- `integration-tests.yml` runs the live graph test daily at 14:37 UTC (and on manual trigger); it assumes the same OIDC role plus FRED/PG/guardrail secrets in GitHub Secrets.
+- `integration-live.yml` is an extra manual-only entry point for the live graph test when you want to trigger it on demand.
+
+### FRASER / Postgres data
+- `scripts/fraser/index_fraser.py` loads the FRASER FOMC catalog into `fomc_items` (columns: `id`, `titleInfo`, `originInfo`, `location`, `recordInfo`). Update the connection values before running; source data lives at `scripts/fraser/output/title_677_items.json`.
+- `scripts/fraser/extractor/load_meetings.py` upserts meeting metadata into `fomc_meetings` (PK `meeting_id`, `meeting_date`, rate fields, votes) from JSON files under `scripts/fraser/extractor/meetings`. It reads `PG_HOST/PG_PORT/PG_NAME/PG_USER/PG_PASS` from the environment.
 
 ## Troubleshooting
 - **Bedrock auth failures**: ensure `AWS_PROFILE` points to a local profile with Bedrock access (or unset it so boto3 falls back to your default credentials). A quick `aws sts get-caller-identity` should succeed before launching the graph.

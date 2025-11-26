@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 from datetime import datetime, timezone
-from typing import Any, Iterable
+from typing import Any
 
 import boto3
 from langchain_aws import ChatBedrockConverse
@@ -15,7 +15,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import StateGraph
 
-from retrieval_graph import retrieval
+# from retrieval_graph import retrieval
 from retrieval_graph.configuration import Configuration
 from retrieval_graph.fraser_tool import search_fomc_titles
 from retrieval_graph.fred_tool import (
@@ -28,7 +28,8 @@ from retrieval_graph.fred_tool import (
 )
 from retrieval_graph.services import get_latest_payload
 from retrieval_graph.state import InputState, State
-from retrieval_graph.utils import format_docs
+
+# from retrieval_graph.utils import format_docs
 
 # from langsmith import Client
 
@@ -215,12 +216,12 @@ TOOL_DEFINITIONS = [
 ]
 
 
-def _summarize_documents(docs: Iterable[Document], *, max_docs: int = 3) -> str:
-    """Convert retrieved docs into a compact string for tool feedback."""
-    limited = list(docs)[:max_docs]
-    if not limited:
-        return "No documents were retrieved."
-    return format_docs(limited)
+# def _summarize_documents(docs: Iterable[Document], *, max_docs: int = 3) -> str:
+#     """Convert retrieved docs into a compact string for tool feedback."""
+#     limited = list(docs)[:max_docs]
+#     if not limited:
+#         return "No documents were retrieved."
+#     return format_docs(limited)
 
 
 async def call_model(state: State, *, config: RunnableConfig) -> dict[str, Any]:
@@ -253,11 +254,11 @@ async def call_model(state: State, *, config: RunnableConfig) -> dict[str, Any]:
         # }
     ).bind_tools(TOOL_DEFINITIONS)
 
-    retrieved_docs = format_docs(state.retrieved_docs)
+    # retrieved_docs = format_docs(state.retrieved_docs)
     message_value = await prompt.ainvoke(
         {
             "messages": state.messages,
-            "retrieved_docs": retrieved_docs,
+            # "retrieved_docs": retrieved_docs,
             "system_time": datetime.now(tz=timezone.utc).isoformat(),
         },
         config,
@@ -307,17 +308,17 @@ async def call_tool(state: State, *, config: RunnableConfig) -> dict[str, Any]:
             )
             break
 
-        if name == "retrieve_documents":
-            query = args.get("query")
-            if not query:
-                content = "No query provided to retrieval tool."
-            else:
-                with retrieval.make_retriever(config) as retriever:
-                    docs = await retriever.ainvoke(query, config)
-                collected_docs.extend(docs)
-                collected_queries.append(query)
-                content = _summarize_documents(docs)
-        elif name == "fred_chart":
+        # if name == "retrieve_documents":
+        #     query = args.get("query")
+        #     if not query:
+        #         content = "No query provided to retrieval tool."
+        #     else:
+        #         with retrieval.make_retriever(config) as retriever:
+        #             docs = await retriever.ainvoke(query, config)
+        #         collected_docs.extend(docs)
+        #         collected_queries.append(query)
+        #         content = _summarize_documents(docs)
+        if name == "fred_chart":
             series_id = args.get("series_id")
             if not series_id:
                 content = "A FRED series_id is required for chart generation."

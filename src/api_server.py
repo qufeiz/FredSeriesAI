@@ -8,11 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.messages import AIMessage, HumanMessage
 from pydantic import BaseModel
 
-try:
-    from supabase import Client, create_client
-except ImportError:
-    create_client = None  # type: ignore
-    Client = None  # type: ignore
+# try:
+#     from supabase import Client, create_client
+# except ImportError:
+#     create_client = None  # type: ignore
+#     Client = None  # type: ignore
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,18 +20,18 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 from retrieval_graph.graph import graph
 
-# Initialize Supabase client
-supabase_url = os.getenv("SUPABASE_URL")
-supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+# # Initialize Supabase client
+# supabase_url = os.getenv("SUPABASE_URL")
+# supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
-if create_client and supabase_url and supabase_key:
-    supabase = create_client(supabase_url, supabase_key)
-else:
-    if not create_client:
-        logger.info("Supabase client not installed; running without auth verification.")
-    else:
-        logger.warning("Supabase credentials not found. Running without auth verification.")
-    supabase = None
+# if create_client and supabase_url and supabase_key:
+#     supabase = create_client(supabase_url, supabase_key)
+# else:
+#     if not create_client:
+#         logger.info("Supabase client not installed; running without auth verification.")
+#     else:
+#         logger.warning("Supabase credentials not found. Running without auth verification.")
+#     supabase = None
 
 app = FastAPI()
 
@@ -49,27 +49,32 @@ class Query(BaseModel):
     conversation: List[Dict[str, str]] = []
 
 
-async def get_current_user(authorization: Optional[str] = Header(None)):
+# async def get_current_user(authorization: Optional[str] = Header(None)):
+#     """Extract and verify user from JWT token."""
+#     if not authorization or not supabase:
+#         # For development without auth
+#         return {"id": "anonymous", "email": "anonymous@example.com"}
+
+#     try:
+#         # Extract token from "Bearer <token>"
+#         token = authorization.replace("Bearer ", "")
+
+#         # Verify token with Supabase
+#         user_response = supabase.auth.get_user(token)
+
+#         if user_response.user:
+#             return {"id": user_response.user.id, "email": user_response.user.email}
+#         else:
+#             raise HTTPException(status_code=401, detail="Invalid token")
+
+#     except Exception as e:
+#         logger.error(f"Auth error: {e}")
+#         raise HTTPException(status_code=401, detail="Authentication failed")
+
+
+async def get_current_user():
     """Extract and verify user from JWT token."""
-    if not authorization or not supabase:
-        # For development without auth
-        return {"id": "anonymous", "email": "anonymous@example.com"}
-
-    try:
-        # Extract token from "Bearer <token>"
-        token = authorization.replace("Bearer ", "")
-
-        # Verify token with Supabase
-        user_response = supabase.auth.get_user(token)
-
-        if user_response.user:
-            return {"id": user_response.user.id, "email": user_response.user.email}
-        else:
-            raise HTTPException(status_code=401, detail="Invalid token")
-
-    except Exception as e:
-        logger.error(f"Auth error: {e}")
-        raise HTTPException(status_code=401, detail="Authentication failed")
+    return {"id": "anonymous", "email": "anonymous@example.com"}
 
 
 @app.get("/")

@@ -1,9 +1,9 @@
 [project]
 name = "retrieval-graph"
 version = "0.0.1"
-description = "Starter template for making a custom retrieval graph in LangGraph."
+description = "Bedrock-powered LangGraph agent for live FRED/FOMC retrieval with FastAPI and App Runner deployment"
 authors = [
-    { name = "William Fu-Hinthorn", email = "13333726+hinthornw@users.noreply.github.com" },
+    { name = "qufeiz", email = "qufeiz@andrew.cmu.edu" },
 ]
 license = { text = "MIT" }
 readme = "README.md"
