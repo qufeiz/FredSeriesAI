@@ -176,9 +176,9 @@ Routing is simple: start → `agent` → optional `tools` → back to `agent` un
   - `fomc_latest_decision` uses `services.get_latest_payload()` to read `fomc_meetings`.
 
 ### Tool catalog (what is actually used)
+<!-- `retrieve_documents` is currently disabled; only the live data tools below are advertised to the model. -->
 | Tool name | Description | Source |
 | --- | --- | --- |
-<!-- | `retrieve_documents` | Optional call into your chosen retriever (Pinecone by default). Configure later—this README focuses on the live data tools. | `retrieval.make_retriever` | -->
 | `fred_chart` | Pulls a FRED-rendered PNG, base64 encodes it, and returns it as an attachment so clients can render the chart inline. | `fred_tool.fetch_chart` |
 | `fred_recent_data` | Returns structured `series_data` (metadata + recent points) for downstream reasoning. | `fred_tool.fetch_recent_data` |
 | `fred_series_release_schedule` | Maps a series to its release and shares upcoming publication dates. | `fred_tool.fetch_series_release_schedule` |
