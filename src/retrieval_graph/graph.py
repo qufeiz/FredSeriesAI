@@ -39,7 +39,7 @@ from retrieval_graph.state import InputState, State
 # client = Client()
 # print("Projects:", [p.name for p in client.list_projects()])
 
-MAX_TOOL_CALLS = 20
+MAX_TOOL_CALLS = 50
 
 TOOL_DEFINITIONS = [
     # {
