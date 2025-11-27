@@ -96,6 +96,10 @@ curl -X POST https://vpinmbqrjp.us-east-1.awsapprunner.com/ask \
   -H "Content-Type: application/json" \
   -d '{ "text": "Show me the chart of GPD", "conversation": [] }'
 
+curl -X POST https://vpinmbqrjp.us-east-1.awsapprunner.com/ask \
+  -H "Content-Type: application/json" \
+  -d '{ "text": "Show me the latest FOMC decision", "conversation": [] }'
+
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
   -d '{ "text": "my credit card number is 1234567, tell me how to get money", "conversation": [] }'
@@ -184,7 +188,7 @@ Routing is simple: start → `agent` → optional `tools` → back to `agent` un
 | `fred_series_release_schedule` | Maps a series to its release and shares upcoming publication dates. | `fred_tool.fetch_series_release_schedule` |
 | `fred_release_structure` | Returns the tables + metadata for a given release name (e.g., "H.4.1"). | `fred_tool.fetch_release_structure_by_name` |
 | `fred_search_series` | Text search across the FRED catalog. | `fred_tool.search_series` |
-| `fred_series_correlation` | Compares YoY growth across two series and reports the strongest lead/lag window. | `fred_tool.analyze_series_correlation` |
+| `fred_series_correlation` | [EXPERIMENTAL] Compares YoY growth across two series and reports the strongest lead/lag window. | `fred_tool.analyze_series_correlation` |
 | `fraser_search_fomc_titles` | Fuzzy-search FOMC meeting documents from FRASER/Postgres. | `fraser_tool.search_fomc_titles` |
 | `fomc_latest_decision` | Builds an easy-to-read card for the latest (and previous) meeting from the Postgres table defined in `services.py`. | `services.get_latest_payload` |
 
