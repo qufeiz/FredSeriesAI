@@ -227,7 +227,7 @@ variable "bedrock_guardrail_version" {
 
 variable "hybrid_search_url" {
   type    = string
-  default = "http://3.87.0.182:3000/api/v1/search/hybrid"
+  default = "http://3.87.0.182:3000"
 }
 
 variable "hybrid_search_token" {
