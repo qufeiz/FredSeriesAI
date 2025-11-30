@@ -57,6 +57,7 @@ Fill in the values you actually use today:
 | `FRED_API_KEY` | Needed for every tool implemented in `fred_tool.py` (charts, datapoints, metadata, correlation). |
 <!-- | `FRED_CHART_WIDTH`, `FRED_CHART_HEIGHT` (optional) | Override the PNG dimensions generated via `fredgraph.png`. | -->
 | `PG_HOST`, `PG_PORT`, `PG_NAME`, `PG_USER`, `PG_PASS` | Required by `fraser_tool.py` and `services.py` to talk to FRASER/FOMC tables. |
+| `HYBRID_SEARCH_URL`, `HYBRID_SEARCH_TOKEN` | Endpoint + bearer token for the FRASER hybrid search service (semantic + keyword). |
 
 > `FRASER_API_KEY`, OpenSearch, or ingestion-specific variables from the original template are no longer needed unless you decide to revive those scripts.
 
@@ -94,11 +95,11 @@ curl -X POST http://localhost:8000/ask \
 
 curl -X POST https://vpinmbqrjp.us-east-1.awsapprunner.com/ask \
   -H "Content-Type: application/json" \
-  -d '{ "text": "Show me the chart of GPD", "conversation": [] }'
+  -d '{ "text": "what happend in fomc september 2020?", "conversation": [] }'
 
 curl -X POST https://vpinmbqrjp.us-east-1.awsapprunner.com/ask \
   -H "Content-Type: application/json" \
-  -d '{ "text": "Show me the latest FOMC decision", "conversation": [] }'
+  -d '{ "text": "what tools do u have", "conversation": [] }'
 
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
@@ -178,6 +179,7 @@ Routing is simple: start → `agent` → optional `tools` → back to `agent` un
 - Runtime tools:
   - `fraser_search_fomc_titles` queries `fomc_items`.
   - `fomc_latest_decision` uses `services.get_latest_payload()` to read `fomc_meetings`.
+  - `fraser_hybrid_search` hits the external hybrid search service (semantic + keyword) configured via `HYBRID_SEARCH_URL`/`HYBRID_SEARCH_TOKEN` and returns FRASER/FOMC snippets.
 
 ### Tool catalog (what is actually used)
 <!-- `retrieve_documents` is currently disabled; only the live data tools below are advertised to the model. -->
@@ -190,6 +192,7 @@ Routing is simple: start → `agent` → optional `tools` → back to `agent` un
 | `fred_search_series` | Text search across the FRED catalog. | `fred_tool.search_series` |
 | `fred_series_correlation` | [EXPERIMENTAL] Compares YoY growth across two series and reports the strongest lead/lag window. | `fred_tool.analyze_series_correlation` |
 | `fraser_search_fomc_titles` | Fuzzy-search FOMC meeting documents from FRASER/Postgres. | `fraser_tool.search_fomc_titles` |
+| `fraser_hybrid_search` | Hybrid (semantic + keyword) search across FRASER/FOMC docs via the external search API. | `hybrid_tool.search_hybrid` |
 | `fomc_latest_decision` | Builds an easy-to-read card for the latest (and previous) meeting from the Postgres table defined in `services.py`. | `services.get_latest_payload` |
 
 ### Attachments, `series_data`, and sources

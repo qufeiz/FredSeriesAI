@@ -66,6 +66,12 @@ resource "aws_ssm_parameter" "pg_pass" {
   value = var.pg_pass
 }
 
+resource "aws_ssm_parameter" "hybrid_search_token" {
+  name  = "/fredgpt/HYBRID_SEARCH_TOKEN"
+  type  = "SecureString"
+  value = var.hybrid_search_token
+}
+
 # ------------------------------
 # IAM Roles for App Runner
 # ------------------------------
@@ -136,18 +142,20 @@ resource "aws_apprunner_service" "backend" {
 
         # Non-secret env vars
         runtime_environment_variables = {
-          AWS_REGION = "us-east-1"
+          AWS_REGION         = "us-east-1"
+          HYBRID_SEARCH_URL  = var.hybrid_search_url
         }
 
         # Secrets pulled from SSM
         runtime_environment_secrets = {
-          FRED_API_KEY = aws_ssm_parameter.fred_api_key.arn
-          PG_HOST      = aws_ssm_parameter.pg_host.arn
-          PG_NAME      = aws_ssm_parameter.pg_name.arn
-          PG_USER      = aws_ssm_parameter.pg_user.arn
-          PG_PASS      = aws_ssm_parameter.pg_pass.arn
-          BEDROCK_GUARDRAIL_ID = aws_ssm_parameter.bedrock_guardrail_id.arn
+          FRED_API_KEY            = aws_ssm_parameter.fred_api_key.arn
+          PG_HOST                 = aws_ssm_parameter.pg_host.arn
+          PG_NAME                 = aws_ssm_parameter.pg_name.arn
+          PG_USER                 = aws_ssm_parameter.pg_user.arn
+          PG_PASS                 = aws_ssm_parameter.pg_pass.arn
+          BEDROCK_GUARDRAIL_ID    = aws_ssm_parameter.bedrock_guardrail_id.arn
           BEDROCK_GUARDRAIL_VERSION = aws_ssm_parameter.bedrock_guardrail_version.arn
+          HYBRID_SEARCH_TOKEN     = aws_ssm_parameter.hybrid_search_token.arn
         }
       }
 
@@ -213,6 +221,16 @@ variable "bedrock_guardrail_id" {
 }
 
 variable "bedrock_guardrail_version" {
+  type      = string
+  sensitive = true
+}
+
+variable "hybrid_search_url" {
+  type    = string
+  default = "http://3.87.0.182:3000/api/v1/search/hybrid"
+}
+
+variable "hybrid_search_token" {
   type      = string
   sensitive = true
 }

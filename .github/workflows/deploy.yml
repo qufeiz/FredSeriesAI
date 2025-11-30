@@ -31,6 +31,8 @@ jobs:
         echo "TF_VAR_pg_pass=${{ secrets.PG_PASS }}" >> $GITHUB_ENV
         echo "TF_VAR_bedrock_guardrail_id=${{ secrets.BEDROCK_GUARDRAIL_ID }}" >> $GITHUB_ENV
         echo "TF_VAR_bedrock_guardrail_version=${{ secrets.BEDROCK_GUARDRAIL_VERSION }}" >> $GITHUB_ENV
+        echo "TF_VAR_hybrid_search_url=${{ secrets.HYBRID_SEARCH_URL }}" >> $GITHUB_ENV
+        echo "TF_VAR_hybrid_search_token=${{ secrets.HYBRID_SEARCH_TOKEN }}" >> $GITHUB_ENV
 
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2

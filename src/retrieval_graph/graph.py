@@ -26,6 +26,7 @@ from retrieval_graph.fred_tool import (
     fetch_series_release_schedule,
     search_series,
 )
+from retrieval_graph.hybrid_tool import search_hybrid
 from retrieval_graph.services import get_latest_payload
 from retrieval_graph.state import InputState, State
 
@@ -199,6 +200,26 @@ TOOL_DEFINITIONS = [
                         "description": "End date for the analysis window (YYYY-MM-DD, default: 1979-12-31).",
                     },
                 },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "fraser_hybrid_search",
+            "description": (
+                "Hybrid (semantic + keyword) search across the FRASER/FOMC corpus. "
+                "Use when the user asks about specific meeting documents, minutes, or statements."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search text for FRASER/FOMC content.",
+                    }
+                },
+                "required": ["query"],
             },
         },
     },
@@ -473,6 +494,27 @@ async def call_tool(state: State, *, config: RunnableConfig) -> dict[str, Any]:
                     "query": query,
                     "results": payload.get("results", []),
                 }
+        elif name == "fraser_hybrid_search":
+            query = args.get("query")
+            if not query:
+                content = "A query is required to run the hybrid FRASER search."
+            else:
+                payload = search_hybrid(query)
+                if payload.get("error"):
+                    content = payload["error"]
+                else:
+                    results = payload.get("results", [])
+                    top_results = results[:5]
+                    # Preserve full result payload for the top 5 hits in the tool message for transparency.
+                    content = (
+                        payload.get("message", "Hybrid search completed.") + "\n" + json.dumps(top_results, indent=2)
+                    )
+                    source_record = {
+                        "tool": name,
+                        "query": query,
+                        "results": results,
+                    }
+                tool_call_count += 1
         elif name == "fomc_latest_decision":
             payload = get_latest_payload()
             message = "Fetched latest FOMC decision card."

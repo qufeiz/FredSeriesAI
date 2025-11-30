@@ -1,9 +1,8 @@
 import logging
-import os
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.messages import AIMessage, HumanMessage
 from pydantic import BaseModel

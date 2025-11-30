@@ -103,7 +103,7 @@ Tools available:
 - fomc_latest_decision(): fetch the latest FOMC decision card including target range, vote, and tool rates.
 - fred_search_series(query): search FRED for series whose metadata matches the query text.
 - fraser_search_fomc_titles(query): fuzzy search FRASER/Postgres meeting titles (e.g. "Meeting, January 26-27, 2010") to retrieve PDF URLs.
-- retrieve_documents(query): search the indexed knowledge base. Use this when the user asks for something not in FRED api.
+- fraser_hybrid_search(query): hybrid semantic+keyword search across FRASER/FOMC documents (minutes, statements, agendas, etc.).
 
 System time: {{system_time}}
 Retrieved documents snapshot:
