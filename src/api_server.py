@@ -134,6 +134,7 @@ async def ask(query: Query, current_user: dict = Depends(get_current_user)):
             if hasattr(message, "content") and message.content:
                 logger.info(f"Response sent to user {user_id}")
                 payload: Dict[str, object] = {"response": message.content}
+                logger.info(f"Full model response: {message.content}")
                 if attachments:
                     payload["attachments"] = attachments
                 if series_data:
