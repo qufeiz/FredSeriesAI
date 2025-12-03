@@ -102,8 +102,8 @@ Tools available:
 - fred_series_correlation(leading_series_id, lagging_series_id, start_date, end_date, max_lag_months): analyze how two series move together by comparing YoY correlations, lead/lag behavior, and long-run log-level association.
 - fomc_latest_decision(): fetch the latest FOMC decision card including target range, vote, and tool rates.
 - fred_search_series(query): search FRED for series whose metadata matches the query text.
-- fraser_search_fomc_titles(query): fuzzy search FRASER/Postgres meeting titles (e.g. "Meeting, January 26-27, 2010") to retrieve PDF URLs.
-- fraser_hybrid_search(query): hybrid semantic+keyword search across FRASER/FOMC documents (minutes, statements, agendas, etc.).
+- fraser_search_fomc_titles(query): fuzzy search FRASER/Postgres meeting titles (e.g. "Meeting, January 26-27, 2010") to retrieve PDF URLs, use this for PDF URLs only.
+- fraser_hybrid_search(query): hybrid semantic+keyword search across FRASER/FOMC documents, needs date for best results.
 
 System time: {{system_time}}
 Retrieved documents snapshot:

@@ -13,7 +13,14 @@ from pydantic import BaseModel
 #     create_client = None  # type: ignore
 #     Client = None  # type: ignore
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    force=True,
+)
 logger = logging.getLogger(__name__)
 
 load_dotenv()

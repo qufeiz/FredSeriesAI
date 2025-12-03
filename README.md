@@ -249,3 +249,64 @@ Beyond `.env`, LangGraph lets you pass configuration via `--config` or Studio. U
 <!-- - Wire up your preferred vector store in `retrieval.make_retriever` and start indexing documents via `index_graph.py` when you need private context. -->
 - Add new tools by extending `TOOL_DEFINITIONS` and handling them inside `call_tool`—follow the pattern used by the FRED helpers.
 - Swap Bedrock models or add fallbacks by adjusting the `ChatBedrockConverse` construction to read model IDs from config instead of constants.
+
+<!-- eval:https://smith.langchain.com/public/35347757-e950-4c7d-9deb-e0fbf3d7303e/r
+what is the unemployment rate by demographic
+question: what is the unemployment rate by demographic
+{
+  "accuracy": {
+    "score": 5,
+    "justification": "All unemployment rates in the model's response match the latest September 2025 values returned by the tool. No numerical errors or invented series were found."
+  },
+  "completeness": {
+    "score": 5,
+    "justification": "The model reported every demographic category retrieved by the tool: overall rate, age 16–19, all race/ethnicity groups, and gender for workers 20+. No categories were omitted."
+  },
+  "clarity_structure": {
+    "score": 4.5,
+    "justification": 'The answer is cleanly organized with headings and lists. Minor improvement would be explicitly grouping the "20 years and over" category before gender, rather than referencing it indirectly.'
+  },
+  "reasoning_data_use": {
+    "score": 5,
+    "justification": "Interpretations are fully supported by the data: youth unemployment is higher, racial disparities exist, gender differences are small. No incorrect trends, no causal claims, and no extrapolations."
+  },
+  "policy_safety": {
+    "score": 4.5,
+    "justification": "The response discusses demographic unemployment differences using official statistics and without harmful inference. A brief clarification about structural factors could further reduce risk of misinterpretation."
+  },
+  "final_score": {
+    "score": 24,
+    "max_score": 25,
+    "percentage": 96
+  }
+}
+
+eval:https://smith.langchain.com/public/b822e419-b2de-4d1d-87b3-32fb8502c149/r
+What were the policy changes for the latest FOMC meeting? What was the reasoning behind them?
+{
+  "accuracy": {
+    "score": 5,
+    "justification": "All policy details match the tool document: the 25bp cut to 3.75–4.00%, QT ending Dec 1, reinvestment beginning Dec 1, and the 10–2 vote with Miran and Schmid dissenting. No invented policy actions or misquoted language."
+  },
+  "completeness": {
+    "score": 5,
+    "justification": "The answer covers every major component in the retrieved FOMC text: rate change, balance sheet decision, implementation details, vote breakdown, and the reasoning section (economic activity, labor market, inflation, risk balance). Nothing in the original excerpt is meaningfully omitted."
+  },
+  "clarity_structure": {
+    "score": 4.5,
+    "justification": "Extremely clear structure: policy changes, reasoning, vote details. Uses headings and lists. Minor nit: could include the exact wording of the balance-sheet instructions for even more precision, but that's optional."
+  },
+  "reasoning_data_use": {
+    "score": 5,
+    "justification": "The explanation is fully grounded in the text: moderate growth, slowing job gains, elevated inflation, shift in risks. No fabricated interpretations. No extrapolation beyond what's in the statement."
+  },
+  "policy_safety": {
+    "score": 5,
+    "justification": "All content involves public monetary policy information. No sensitive or risky content. Clean and compliant."
+  },
+  "final_score": {
+    "score": 24.5,
+    "max_score": 25,
+    "percentage": 98
+  }
+} -->
