@@ -94,7 +94,7 @@ async def root():
 @app.post("/ask")
 async def ask(query: Query, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
-    logger.info(f"Query from user {user_id} ({current_user['email']}): {query.text[:100]}...")
+    logger.info(f"Query from user {user_id} ({current_user['email']}): {query.text}...")
 
     try:
         # Build conversation history

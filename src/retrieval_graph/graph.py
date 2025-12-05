@@ -255,8 +255,8 @@ async def call_model(state: State, *, config: RunnableConfig) -> dict[str, Any]:
         ]
     )
     profile_name = os.environ.get("AWS_PROFILE")
-    guardrail_id = os.environ.get("BEDROCK_GUARDRAIL_ID")
-    guardrail_version = os.environ.get("BEDROCK_GUARDRAIL_VERSION")
+    # guardrail_id = os.environ.get("BEDROCK_GUARDRAIL_ID")
+    # guardrail_version = os.environ.get("BEDROCK_GUARDRAIL_VERSION")
     if profile_name:
         session = boto3.Session(profile_name=profile_name)
     else:
@@ -287,11 +287,11 @@ async def call_model(state: State, *, config: RunnableConfig) -> dict[str, Any]:
     response = await model.ainvoke(
         message_value,
         config,
-        guardrailConfig={
-            "guardrailIdentifier": guardrail_id,
-            "guardrailVersion": guardrail_version,
-            "trace": "enabled",
-        },
+        # guardrailConfig={
+        #     "guardrailIdentifier": guardrail_id,
+        #     "guardrailVersion": guardrail_version,
+        #     "trace": "enabled",
+        # },
     )
     return {"messages": [response]}
 
