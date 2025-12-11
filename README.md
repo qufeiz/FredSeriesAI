@@ -50,7 +50,7 @@ More (links):
 ```bash
 cd /path/to/projects
 git clone https://github.com/qufeiz/FredSeriesAI.git
-cd FredGPT-backend
+cd FredSeriesAI
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
 ```
@@ -76,7 +76,7 @@ Fill in the values you actually use today:
 ### AWS SSO quickstart
 If you use AWS SSO, initialize your CLI profile and log in:
 ```bash
-aws configure sso # create your profile (sso_start_url: https://stlfrb.awsapps.com/start)
+aws configure sso # create your profile
 aws sso login --profile AWSAdministratorAccess # use your profile name
 ```
 During `aws configure sso` supply your org values (e.g., start URL, SSO region, account ID, role name, preferred profile name). Subsequent CLI calls (including Terraform) will pick up the saved profile.
