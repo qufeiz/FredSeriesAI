@@ -5,7 +5,11 @@
 <!-- [Open in LangGraph Studio](https://langgraph-studio.vercel.app/templates/open?githubUrl=https://github.com/langchain-ai/retrieval-agent-template)
 · [Hosted graph](https://my-langgraph-app.fly.dev) · [Studio session on Smith](https://smith.langchain.com/studio/?baseUrl=https://my-langgraph-app.fly.dev) -->
 
-![Graph view in LangGraph studio UI](./static/studio_ui.png)
+![Graph view](./static/Screenshot%202025-12-11%20at%201.42.01%E2%80%AFAM.png)
+
+## Demo
+Watch the walkthrough:
+https://drive.google.com/file/d/19mCbWbvYeDhc0DlvhBv7k6XB2ZQMBRY-/view?usp=sharing
 
 ## TL;DR
 - Conversational loop runs on LangGraph with a single `StateGraph` (see `src/retrieval_graph/graph.py`), powered by `ChatBedrockConverse` (`us.anthropic.claude-sonnet-4-5-20250929-v1:0`).
