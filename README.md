@@ -1,4 +1,4 @@
-# My LangGraph App
+# FOMC and Fred AI Assistant
 
 > A LangGraph-based financial copilot that combines AWS Bedrock conversations with live FRED and FOMC data tools.
 
@@ -12,7 +12,7 @@
 - Built-in tools cover FRED charts, recent datapoints, release metadata, FRASER/Postgres searches, and a live "latest FOMC decision" card.
 <!-- - Document retrieval is wired to `retrieve_documents` and `retrieval.make_retriever`, but the focus of this README is the Bedrock + tooling experience—hook your own vector store when you are ready. -->
 - LangSmith tracing is enabled so every run is observable; attachments (chart images) and structured `series_data` ride outside the prompt for richer UX.
-- Public App Runner endpoint (current): https://vpinmbqrjp.us-east-1.awsapprunner.com
+<!-- - Public App Runner endpoint (current): https://vpinmbqrjp.us-east-1.awsapprunner.com -->
 
 ## Repository layout
 | Path | Purpose |
@@ -28,7 +28,7 @@
 
 ## Prerequisites
 - Python 3.11+ and a modern virtual environment tool (e.g., `uv`, `pip`, or `conda`).
-- AWS account with Bedrock access to Anthropic Claude models and a configured profile (the code references `AWSAdministratorAccess-112393354239`—change it or expose the same profile on your machine).
+- AWS account with Bedrock access to Anthropic Claude models and a configured profile.
 - FRED API key for charts/data (`FRED_API_KEY`).
 - Network access + credentials for the FRASER/Postgres databases that hold FOMC items and meeting decisions.
 - Optional but recommended: LangSmith account for tracing (`LANGSMITH_API_KEY`).
@@ -37,7 +37,7 @@
 ### 1. Clone & install
 ```bash
 cd /path/to/projects
-git clone https://github.com/FED-FREDGPT/FredGPT-backend.git
+git clone https://github.com/qufeiz/FredSeriesAI.git
 cd FredGPT-backend
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
@@ -65,7 +65,7 @@ Fill in the values you actually use today:
 If you use AWS SSO, initialize your CLI profile and log in:
 ```bash
 aws configure sso # create your profile (sso_start_url: https://stlfrb.awsapps.com/start)
-aws sso login --profile AWSAdministratorAccess-112393354239 # use your profile name
+aws sso login --profile AWSAdministratorAccess # use your profile name
 ```
 During `aws configure sso` supply your org values (e.g., start URL, SSO region, account ID, role name, preferred profile name). Subsequent CLI calls (including Terraform) will pick up the saved profile.
 
@@ -97,13 +97,13 @@ curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
   -d '{ "text": "Greetings, do you have data on inflation in Denmark?", "conversation": [] }'
 
-curl -X POST https://vpinmbqrjp.us-east-1.awsapprunner.com/ask \
-  -H "Content-Type: application/json" \
-  -d '{ "text": "what happend in fomc september 2020?", "conversation": [] }'
+# curl -X POST https://vpinmbqrjp.us-east-1.awsapprunner.com/ask \
+#   -H "Content-Type: application/json" \
+#   -d '{ "text": "what happend in fomc september 2020?", "conversation": [] }'
 
-curl -X POST https://vpinmbqrjp.us-east-1.awsapprunner.com/ask \
-  -H "Content-Type: application/json" \
-  -d '{ "text": "what tools do u have", "conversation": [] }'
+# curl -X POST https://vpinmbqrjp.us-east-1.awsapprunner.com/ask \
+#   -H "Content-Type: application/json" \
+#   -d '{ "text": "what tools do u have", "conversation": [] }'
 
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
@@ -247,7 +247,7 @@ Beyond `.env`, LangGraph lets you pass configuration via `--config` or Studio. U
 - **FRED errors**: double-check `FRED_API_KEY` and API limits. `fredapi` raises helpful exceptions that propagate back through the tool message.
 - **Postgres connectivity**: the FRASER helpers rely on SSL defaults—if your DB requires custom SSL params, adjust `_pg_connect` helpers accordingly.
 - **Attachments not rendering**: confirm your client consumes the `attachments` array from the graph response; LangGraph Studio does this automatically.
-- **LangSmith noise**: unset `LANGSMITH_API_KEY` or export `LANGCHAIN_TRACING_V2=false` to disable tracing temporarily.
+- **LangSmith noise**: unset `LANGSMITH_API_KEY` or export `LANGCHAIN_TRACING=false` to disable tracing temporarily.
 
 ## Next steps
 <!-- - Wire up your preferred vector store in `retrieval.make_retriever` and start indexing documents via `index_graph.py` when you need private context. -->
