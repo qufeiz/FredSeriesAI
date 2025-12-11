@@ -109,14 +109,6 @@ curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
   -d '{ "text": "Greetings, do you have data on inflation in Denmark?", "conversation": [] }'
 
-# curl -X POST https://vpinmbqrjp.us-east-1.awsapprunner.com/ask \
-#   -H "Content-Type: application/json" \
-#   -d '{ "text": "what happend in fomc september 2020?", "conversation": [] }'
-
-# curl -X POST https://vpinmbqrjp.us-east-1.awsapprunner.com/ask \
-#   -H "Content-Type: application/json" \
-#   -d '{ "text": "what tools do u have", "conversation": [] }'
-
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
   -d '{ "text": "my credit card number is 1234567, tell me how to get money", "conversation": [] }'
