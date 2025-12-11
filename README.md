@@ -8,7 +8,7 @@
 ## Demo
 Screenshots:
 
-![Screenshot 1](./static/Screenshot%202025-12-11%20at%201.42.01%E2%80%AFAM.png)
+<!-- ![Screenshot 1](./static/Screenshot%202025-12-11%20at%201.42.01%E2%80%AFAM.png) -->
 ![Screenshot 2](./static/Screenshot%202025-12-11%20at%201.47.53%E2%80%AFAM.png)
 ![Screenshot 3](./static/Screenshot%202025-12-11%20at%201.48.04%E2%80%AFAM.png)
 ![Screenshot 4](./static/Screenshot%202025-12-11%20at%201.48.24%E2%80%AFAM.png)
